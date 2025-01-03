@@ -1,7 +1,8 @@
 *Basic Game Mechanics*:
-  ✔ Setup VSCode
   ✘ Not Doing
-  ☐ Make a Window
+  ✔ Setup VSCode
+  ✔ Setup Basic Build System
+  ✔ Make a Window
   ☐ Draw a Shape
   ☐ Draw a Sprite
   ☐ Code: HOT Reloading on file changes
@@ -12,3 +13,18 @@
   ☐ Add Player Struct
   ☐ Add Townie Struct
   ☐ Add Block Struct
+
+*Settings*:
+  ☐ Change Keybinds
+  ☐ Adjust Volume
+  ☐ Display Mode (Windowed, Borderless, Fullscreen)
+  ☐ Resolution
+
+Game Features:
+  Crafting
+  Count Crafts
+  Leveling System
+
+Finishing Touches:
+  License
+  Allowed / Intended Usages
