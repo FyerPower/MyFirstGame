@@ -1,0 +1,14 @@
+*Basic Game Mechanics*:
+  ✔ Setup VSCode
+  ✘ Not Doing
+  ☐ Make a Window
+  ☐ Draw a Shape
+  ☐ Draw a Sprite
+  ☐ Code: HOT Reloading on file changes
+  ☐ Add Keybinds to Move Sprite
+  ☐ Add Collision
+
+*Misc*:
+  ☐ Add Player Struct
+  ☐ Add Townie Struct
+  ☐ Add Block Struct
