@@ -1,0 +1,9 @@
+{
+    "editor.formatOnSave": true,
+    "triggerTaskOnSave.tasks": {
+        "Build": [
+            "src/*",
+            "build.sh"
+        ],
+    }
+}

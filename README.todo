@@ -3,6 +3,7 @@
   ✔ Setup VSCode
   ✔ Setup Basic Build System
   ✔ Make a Window
+  ☐ Add System Logging
   ☐ Draw a Shape
   ☐ Draw a Sprite
   ☐ Code: HOT Reloading on file changes
@@ -21,10 +22,11 @@
   ☐ Resolution
 
 Game Features:
-  Crafting
-  Count Crafts
-  Leveling System
+  ☐ Crafting
+  ☐ Count Crafts
+  ☐ Leveling System
 
 Finishing Touches:
-  License
-  Allowed / Intended Usages
+  ☐ License
+  ☐ Allowed / Intended Usages
+
