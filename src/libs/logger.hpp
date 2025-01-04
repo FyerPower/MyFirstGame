@@ -15,7 +15,7 @@
 #endif
 
 // ###############################################
-//                     Logging
+//                     Functions
 // ###############################################
 
 enum TextColor {
@@ -38,9 +38,9 @@ enum TextColor {
     TEXT_COLOR_COUNT
 };
 
-template <typename... Args> void _log(char *prefix, char *msg, TextColor textColor, Args... args)
+template <typename... Args> void _log(char* prefix, char* msg, TextColor textColor, Args... args)
 {
-    static char *TextColorTable[TEXT_COLOR_COUNT] = {
+    static char* TextColorTable[TEXT_COLOR_COUNT] = {
         "\x1b[30m", // TEXT_COLOR_BLACK,
         "\x1b[31m", // TEXT_COLOR_RED,
         "\x1b[32m", // TEXT_COLOR_GREEN,
@@ -68,14 +68,14 @@ template <typename... Args> void _log(char *prefix, char *msg, TextColor textCol
     puts(textBuffer);
 }
 
-#define SM_TRACE(msg, ...) _log("TRACE: ", msg, TEXT_COLOR_GREEN, ##__VA_ARGS__);
-#define SM_WARN(msg, ...) _log("WARN:  ", msg, TEXT_COLOR_YELLOW, ##__VA_ARGS__);
-#define SM_ERROR(msg, ...) _log("ERROR: ", msg, TEXT_COLOR_RED, ##__VA_ARGS__);
-#define SM_ASSERT(x, msg, ...)                                                                                         \
+#define FP_LOG(msg, ...) _log("LOG:   ", msg, TEXT_COLOR_GREEN, ##__VA_ARGS__);
+#define FP_WARN(msg, ...) _log("WARN:  ", msg, TEXT_COLOR_YELLOW, ##__VA_ARGS__);
+#define FP_ERROR(msg, ...) _log("ERROR: ", msg, TEXT_COLOR_RED, ##__VA_ARGS__);
+#define FP_ASSERT(x, msg, ...)                                                                                         \
     {                                                                                                                  \
         if (!x) {                                                                                                      \
-            SM_ERROR(msg, ##__VA_ARGS__);                                                                              \
+            FP_ERROR(msg, ##__VA_ARGS__);                                                                              \
             DEBUG_BREAK();                                                                                             \
-            SM_ERROR("Assertion Hit", ##__VA_ARGS__);                                                                  \
+            FP_ERROR("Assertion Hit", ##__VA_ARGS__);                                                                  \
         }                                                                                                              \
     }

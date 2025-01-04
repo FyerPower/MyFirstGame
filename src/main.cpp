@@ -10,7 +10,7 @@ static bool isRunning = true;
 //                     Functions
 // ###############################################
 
-bool platform_create_window(int width, int height, char *title);
+bool platform_create_window(int width, int height, char* title);
 void platform_update_window();
 
 #ifdef _WIN32
@@ -38,7 +38,7 @@ LRESULT CALLBACK windows_window_callback(HWND window, UINT msg, WPARAM wParam, L
     }
     return result;
 }
-bool platform_create_window(int width, int height, char *title)
+bool platform_create_window(int width, int height, char* title)
 {
     HINSTANCE instance = GetModuleHandleA(0);
     WNDCLASSA wc = {};
@@ -89,15 +89,17 @@ int main()
     // Create the Window
     platform_create_window(1280, 720, "My Game");
 
+    FP_LOG("Window Created");
+
     // Main Game Loop
     while (isRunning) {
         // Update the Window
         platform_update_window();
 
-        SM_TRACE("Hello");
-        SM_WARN("Hello");
-        SM_ERROR("Hello");
-        SM_ASSERT(false, "Hello");
+        // FP_LOG("Hello");
+        // FP_WARN("Hello");
+        // FP_ERROR("Hello");
+        // FP_ASSERT(true, "Assertion Hit");
     }
 
     // Return 0 when game loop is done (exitting appliation)
