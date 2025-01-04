@@ -3,8 +3,8 @@
   ✔ Setup VSCode
   ✔ Setup Basic Build System
   ✔ Make a Window
-  ☐ Add System Logging
-  ☐ Draw a Shape
+  ✔ Add System Logging
+  ✔ Draw a Shape
   ☐ Draw a Sprite
   ☐ Code: HOT Reloading on file changes
   ☐ Add Keybinds to Move Sprite
