@@ -1,12 +1,21 @@
 #pragma once
 
-#include "logger.hpp";
+#include "logger.hpp"
 
 // This is to get malloc
-#include <stdlib.h>;
+#include <stdlib.h>
 
 // This is to get memset
-#include <string.h>;
+#include <string.h>
+
+// ###############################################
+//                     Defines
+// ###############################################
+
+#define BIT(x) 1 << (x)
+#define KB(x) ((unsigned long long)1024 * x)
+#define MB(x) ((unsigned long long)1024 * KB(x))
+#define GB(x) ((unsigned long long)1024 * MB(x))
 
 // ###############################################
 //                     Functions
@@ -35,7 +44,9 @@ BumpAllocator make_bump_allocator(size_t size)
     else {
         FP_ASSERT(false, "Failed to allocate memory.");
     }
-}
+
+    return ba;
+};
 
 char* bump_alloc(BumpAllocator* bumpAllocator, size_t size)
 {
@@ -55,4 +66,4 @@ char* bump_alloc(BumpAllocator* bumpAllocator, size_t size)
     }
 
     return result;
-}
+};

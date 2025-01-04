@@ -1,13 +1,13 @@
-#pragma once;
+#pragma once
 
-#include "bump_allocator.hpp";
-#include "logger.hpp";
+#include "bump_allocator.hpp"
+#include "logger.hpp"
 
 // This is to get the edit timestampt of files
-#include <sys/stat.h>;
+#include <sys/stat.h>
 
 // This is to get memset
-#include <string.h>;
+#include <string.h>
 
 // ###############################################
 //                     Functions
@@ -18,7 +18,7 @@ long long get_timestamp(const char* filePath)
     struct stat file_stat = {}; // Construct the file_stat variable
     stat(filePath, &file_stat); // Get the stats of a file and store it into `file_stat`
     return file_stat.st_mtime;  // Return the modified timestamp of the file
-}
+};
 
 long get_file_size(const char* filePath)
 {
@@ -27,7 +27,7 @@ long get_file_size(const char* filePath)
     return file_stat.st_size; // Return the size of the file.  Caveat: This only works for regular files, not symlinks /
                               // shared memory objects / or typed memory objects. If those are needed, you will need to
                               // open the file, fseek to the end, ftell to get the size, fseek back to start, and close.
-}
+};
 
 bool file_exists(const char* filePath)
 {
@@ -116,7 +116,7 @@ void write_file(const char* filePath, char* buffer, int fileSize)
 
     // Close the File
     fclose(file);
-}
+};
 
 bool copy_file(const char* filePath, const char* outputPath, char* buffer)
 {
@@ -148,7 +148,7 @@ bool copy_file(const char* filePath, const char* outputPath, char* buffer)
 
     // return success
     return true;
-}
+};
 
 bool copy_file(const char* filePath, const char* outputPath, BumpAllocator* bumpAllocator)
 {
@@ -165,4 +165,4 @@ bool copy_file(const char* filePath, const char* outputPath, BumpAllocator* bump
 
     // if no filesize was found, return
     return false;
-}
+};
