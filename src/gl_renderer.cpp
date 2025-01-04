@@ -31,6 +31,31 @@ static void APIENTRY gl_debug_callback(GLenum source, GLenum type, GLuint id, GL
     }
 }
 
+GLuint gl_create_shaders(GLenum shaderType, char* shaderPath, BumpAllocator* transientStorage)
+{
+    int fileSize = 0;
+    GLuint shaderId = glCreateShader(shaderType);
+    char* shader = read_file(shaderPath, &fileSize, transientStorage);
+    if (!shader) {
+        FP_ASSERT(false, "Failed to load shaders.");
+        return false;
+    }
+    glShaderSource(shaderId, 1, &shader, 0);
+    glCompileShader(shaderId);
+    // Test if Vertext Shader compiled successfully
+    {
+        int success;
+        char shaderLog[2048] = {};
+        glGetShaderiv(shaderId, GL_COMPILE_STATUS, &success);
+        if (!success) {
+            glGetShaderInfoLog(shaderId, 2048, 0, shaderLog);
+            FP_ASSERT(false, "Failed to compile Vertex Shaders %s", shaderLog);
+        }
+    }
+
+    return shaderId;
+};
+
 bool gl_init(BumpAllocator* transientStorage)
 {
     // Load all OpenGL Functions
@@ -38,50 +63,14 @@ bool gl_init(BumpAllocator* transientStorage)
 
     // Register callback method that will handle debug messaging within OpenGL
     glDebugMessageCallback(&gl_debug_callback, nullptr);
-
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glEnable(GL_DEBUG_OUTPUT);
 
-    int fileSize = 0;
+    // create our shaders
+    GLuint vertShaderID = gl_create_shaders(GL_VERTEX_SHADER, "assets/shaders/quad.vert", transientStorage);
+    GLuint fragShaderID = gl_create_shaders(GL_FRAGMENT_SHADER, "assets/shaders/quad.frag", transientStorage);
 
-    GLuint vertShaderID = glCreateShader(GL_VERTEX_SHADER);
-    char* vertShader = read_file("assets/shaders/quad.vert", &fileSize, transientStorage);
-    if (!vertShader) {
-        FP_ASSERT(false, "Failed to load shaders.");
-        return false;
-    }
-    glShaderSource(vertShaderID, 1, &vertShader, 0);
-    glCompileShader(vertShaderID);
-    // Test if Vertext Shader compiled successfully
-    {
-        int success;
-        char shaderLog[2048] = {};
-        glGetShaderiv(vertShaderID, GL_COMPILE_STATUS, &success);
-        if (!success) {
-            glGetShaderInfoLog(vertShaderID, 2048, 0, shaderLog);
-            FP_ASSERT(false, "Failed to compile Vertex Shaders %s", shaderLog);
-        }
-    }
-
-    GLuint fragShaderID = glCreateShader(GL_FRAGMENT_SHADER);
-    char* fragShader = read_file("assets/shaders/quad.frag", &fileSize, transientStorage);
-    if (!fragShader) {
-        FP_ASSERT(false, "Failed to load shaders.");
-        return false;
-    }
-    glShaderSource(fragShaderID, 1, &fragShader, 0);
-    glCompileShader(fragShaderID);
-    // Test if Vertext Shader compiled successfully
-    {
-        int success;
-        char shaderLog[2048] = {};
-        glGetShaderiv(fragShaderID, GL_COMPILE_STATUS, &success);
-        if (!success) {
-            glGetShaderInfoLog(fragShaderID, 2048, 0, shaderLog);
-            FP_ASSERT(false, "Failed to compile Vertex Shaders %s", shaderLog);
-        }
-    }
-
+    // Create the OpenGL Program, attach shaders, and link to the context
     glContext.programID = glCreateProgram();
     glAttachShader(glContext.programID, vertShaderID);
     glAttachShader(glContext.programID, fragShaderID);
@@ -109,6 +98,9 @@ bool gl_init(BumpAllocator* transientStorage)
     return true;
 };
 
+/**
+ * R
+ */
 void gl_render()
 {
     glClearColor(119.0f / 255.0f, 33.0f / 255.0f, 111.0f / 255.0f, 1.0f);

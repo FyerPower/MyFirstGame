@@ -7,7 +7,7 @@
 #define NOMINMAX
 // #include <xaudio2.h>
 #include <windows.h>
-#include "wglext.h"
+#include "opengl/wglext.h"
 
 // ###############################################
 //                     Globals
