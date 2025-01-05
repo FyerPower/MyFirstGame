@@ -2,6 +2,7 @@
     "editor.formatOnSave": true,
     "triggerTaskOnSave.tasks": {
         "Build": [
+            "assets/**/*",
             "src/**/*",
             "src/*",
             "build.sh"

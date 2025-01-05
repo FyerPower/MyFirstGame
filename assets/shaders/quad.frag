@@ -1,7 +1,36 @@
 #version 430 core
-layout (location = 0) out vec4 fragColor;
+
+// ###############################################
+//                     Input
+// ###############################################
+
+layout(location = 0) in vec2 textureCoordsIn;
+
+// ###############################################
+//                     Output
+// ###############################################
+
+layout(location = 0) out vec4 fragColor;
+
+// ###############################################
+//                     Bindings
+// ###############################################
+
+// binding = 0 binds to GL_TEXTURE0, binding = 1 binds to GL_TEXTURE1, etc.
+layout(binding = 0) uniform sampler2D textureAtlas;
+
+// ###############################################
+//                     Main Logic
+// ###############################################
+
 void main()
 {
-  // White Quad
-  fragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    vec4 textureColor = texelFetch(textureAtlas, ivec2(textureCoordsIn), 0);
+
+    // do not render pixels that have no alpha
+    if(textureColor.a == 0.0) {
+        discard;
+    }
+
+    fragColor = textureColor;
 }

@@ -1,13 +1,13 @@
 #pragma once
 
 #include "platform.hpp"
-#include "../libs/logger.hpp"
+#include "../libs/libs.hpp"
 
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
-// #include <xaudio2.h>
 #include <windows.h>
-#include "opengl/wglext.h"
+#include "wglext.h"
+// #include <xaudio2.h>
 
 // ###############################################
 //                     Globals
@@ -79,7 +79,7 @@ bool platform_create_window(int width, int height, char* title)
                                  title,    // Class Name
                                  title,    // Window Title
                                  dwStyle,  // Style
-                                 -1000,    // Position X
+                                 -900,     // Position X
                                  1100,     // Position Y
                                  width,    // Width
                                  height,   // Height
@@ -168,7 +168,7 @@ bool platform_create_window(int width, int height, char* title)
                                  title,    // Class Name
                                  title,    // Window Title
                                  dwStyle,  // Style
-                                 -1000,    // Position X
+                                 -900,     // Position X
                                  1100,     // Position Y
                                  width,    // Width
                                  height,   // Height

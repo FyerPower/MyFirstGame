@@ -1,19 +1,38 @@
 #pragma once
 
+// #define GL_GLEXT_PROTOTYPES
+// #include "glcorearb.h"
+
+#include "libs/libs.hpp"
+#include "input.hpp"
 #include "gl_renderer.hpp"
-#include "libs/bump_allocator.hpp"
-#include "libs/file_io.hpp"
+#include "render_interface.hpp"
+
+// To Load PNG Files
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
+// ###############################################
+//                     Constants
+// ###############################################
+
+const char* TEXTURE_PATH = "assets/textures/player/player.png";
 
 // ###############################################
 //                     Structs
 // ###############################################
+
 struct GLContext {
-    GLuint programID;
+    GLuint programID;      //
+    GLuint textureID;      //
+    GLuint transformSBOID; // Transform Storage Buffer Object
+    GLuint screenSizeID;   // The location of the uniform variable "screenSize"
 };
 
 // ###############################################
 //                     Globals
 // ###############################################
+
 static GLContext glContext;
 
 // ###############################################
@@ -49,7 +68,7 @@ GLuint gl_create_shaders(GLenum shaderType, char* shaderPath, BumpAllocator* tra
         glGetShaderiv(shaderId, GL_COMPILE_STATUS, &success);
         if (!success) {
             glGetShaderInfoLog(shaderId, 2048, 0, shaderLog);
-            FP_ASSERT(false, "Failed to compile Vertex Shaders %s", shaderLog);
+            FP_ASSERT(false, "Failed to compile Shaders %s", shaderLog);
         }
     }
 
@@ -87,6 +106,64 @@ bool gl_init(BumpAllocator* transientStorage)
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
 
+    // Texture Loading with STBImage
+    {
+        int width, height, channels;
+        char* data = (char*)stbi_load(TEXTURE_PATH, // Filename,
+                                      &width,       // X Position
+                                      &height,      // Y Position
+                                      &channels,    // Comp (Number of channels)
+                                      4             // Req Comp (Number of channels required)
+        );
+
+        if (!data) {
+            FP_ASSERT(false, "Failed to Load Image")
+            return false;
+        }
+
+        // Generate the texture and store the result into our glContext.textureID
+        glGenTextures(1, &glContext.textureID);
+        // Set our texture as Active (Slot 0 - refers to the shaders "location=0")
+        glActiveTexture(GL_TEXTURE0);
+        // Bind the Texture
+        glBindTexture(GL_TEXTURE_2D, glContext.textureID);
+
+        // Set the texture wrapping/filtering options (on the currently bound texture object)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB8_ALPHA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+        stbi_image_free(data);
+    }
+
+    // Transform Storage Buffer
+    {
+        // Generate (1) buffer and store it within (glContext.transformSBOID)
+        glGenBuffers(1, &glContext.transformSBOID);
+        // Bind (Shader Storage Buffer) at binding (0) to (glContext.transformSBOID)
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, glContext.transformSBOID);
+        // Calculate the max size of our buffer based on its contents
+        GLsizeiptr max_buffer_size = sizeof(Transform) * MAX_TRANSFORMS;
+        // Create and Initialize our (Shader Storage Buffer) with size (max_buffer_size) using data
+        // (renderData.transforms) for use with (drawing)
+        glBufferData(GL_SHADER_STORAGE_BUFFER, max_buffer_size, renderData.transforms, GL_DYNAMIC_DRAW);
+    }
+
+    // Uniforms
+    {
+        glContext.screenSizeID = glGetUniformLocation(glContext.programID, "screenSize");
+    }
+
+    // sRGB output (even if input texture is non-sRGB -> don't rely on texture used)
+    // Your font is not using sRGB, for example (not that it matters there, because no actual color is sampled from it)
+    // But this could prevent some future bug when you start mixing different types of textures
+    // Of course, you still need to correctly set the image file source format when using glTexImage2D()
+    glEnable(GL_FRAMEBUFFER_SRGB);
+    glDisable(GL_MULTISAMPLE);
+
     // Depth Tesing
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_GREATER);
@@ -99,13 +176,31 @@ bool gl_init(BumpAllocator* transientStorage)
 };
 
 /**
- * R
+ *
  */
 void gl_render()
 {
-    glClearColor(119.0f / 255.0f, 33.0f / 255.0f, 111.0f / 255.0f, 1.0f);
+    glClearColor(119.0f / 255.0f, 100.0f / 255.0f, 100.0f / 255.0f, 1.0f);
     glClearDepth(0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glViewport(0, 0, input.screenSizeX, input.screenSizeY);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    // Copy screen size to the GPU
+    Vec2 screenSize = {(float)input.screenSizeX, (float)input.screenSizeY};
+    glUniform2fv(glContext.screenSizeID, 1, &screenSize.x);
+
+    // Opaque Objects
+    {
+        // Copy transforms to the GPU
+        GLsizeiptr buffer_size = sizeof(Transform) * renderData.transformCount;
+        glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, buffer_size, renderData.transforms);
+
+        //
+        glDrawArraysInstanced(GL_TRIANGLES, 0, 6, renderData.transformCount);
+
+        FP_LOG("Rendering: %i items", renderData.transformCount);
+
+        // Reset for next Frame
+        renderData.transformCount = 0;
+    }
 }

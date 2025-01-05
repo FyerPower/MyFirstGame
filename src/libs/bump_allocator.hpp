@@ -18,7 +18,7 @@
 #define GB(x) ((unsigned long long)1024 * MB(x))
 
 // ###############################################
-//                     Functions
+//                     Structs
 // ###############################################
 
 struct BumpAllocator {
@@ -26,6 +26,10 @@ struct BumpAllocator {
     size_t used;
     char* memory;
 };
+
+// ###############################################
+//                     Functions
+// ###############################################
 
 BumpAllocator make_bump_allocator(size_t size)
 {
