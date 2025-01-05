@@ -1,7 +1,7 @@
 #pragma once
 
-// #define GL_GLEXT_PROTOTYPES
-// #include "glcorearb.h"
+#define GL_GLEXT_PROTOTYPES
+#include "glcorearb.h"
 
 #include "libs/libs.hpp"
 #include "input.hpp"
@@ -23,10 +23,11 @@ const char* TEXTURE_PATH = "assets/textures/player/player.png";
 // ###############################################
 
 struct GLContext {
-    GLuint programID;      //
-    GLuint textureID;      //
-    GLuint transformSBOID; // Transform Storage Buffer Object
-    GLuint screenSizeID;   // The location of the uniform variable "screenSize"
+    GLuint programID;         //
+    GLuint textureID;         //
+    GLuint transformSBOID;    // Transform Storage Buffer Object
+    GLuint screenSizeID;      // The location of the uniform variable "screenSize"
+    GLuint orthoProjectionID; // The location of the uniform variable "orthoProjection"
 };
 
 // ###############################################
@@ -155,6 +156,7 @@ bool gl_init(BumpAllocator* transientStorage)
     // Uniforms
     {
         glContext.screenSizeID = glGetUniformLocation(glContext.programID, "screenSize");
+        glContext.orthoProjectionID = glGetUniformLocation(glContext.programID, "orthoProjection");
     }
 
     // sRGB output (even if input texture is non-sRGB -> don't rely on texture used)
@@ -188,6 +190,14 @@ void gl_render()
     // Copy screen size to the GPU
     Vec2 screenSize = {(float)input->screenSizeX, (float)input->screenSizeY};
     glUniform2fv(glContext.screenSizeID, 1, &screenSize.x);
+
+    // Orthographic Projection
+    OrthographicCamera2D camera = renderData->gameCamera;
+    Mat4 orthoProjection = orthographic_projection(camera.position.x - camera.dimensions.x / 2.0f,  // left
+                                                   camera.position.x + camera.dimensions.x / 2.0f,  // right
+                                                   camera.position.y - camera.dimensions.y / 2.0f,  // top
+                                                   camera.position.y + camera.dimensions.y / 2.0f); // bottom
+    glUniformMatrix4fv(glContext.orthoProjectionID, 1, GL_FALSE, &orthoProjection.ax);
 
     // Opaque Objects
     {

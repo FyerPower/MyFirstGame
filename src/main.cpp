@@ -52,9 +52,15 @@ int main()
         return -1;
     }
 
-    renderData = (RenderData*)bump_alloc(&persistentStorage, sizeof(Input));
-    if (!input) {
-        FP_ERROR("Failed to allow Input");
+    renderData = (RenderData*)bump_alloc(&persistentStorage, sizeof(RenderData));
+    if (!renderData) {
+        FP_ERROR("Failed to allow RenderData");
+        return -1;
+    }
+
+    gameState = (GameState*)bump_alloc(&persistentStorage, sizeof(GameState));
+    if (!gameState) {
+        FP_ERROR("Failed to allow GameState");
         return -1;
     }
 
@@ -78,7 +84,7 @@ int main()
         FP_LOG("Initialized Transient Storage");
 
         // Update Game
-        update_game(renderData, input);
+        update_game(gameState, renderData, input);
 
         // Update OpenGL
         gl_render();
@@ -101,9 +107,9 @@ int main()
 // ###############################################
 
 // Wrapper Function
-void update_game(RenderData* renderDataIn, Input* inputIn)
+void update_game(GameState* gameStateIn, RenderData* renderDataIn, Input* inputIn)
 {
-    update_game_ptr(renderDataIn, inputIn);
+    update_game_ptr(gameStateIn, renderDataIn, inputIn);
 }
 
 void reload_game_dll(BumpAllocator* transientStorage)

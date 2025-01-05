@@ -31,6 +31,7 @@ layout(location = 0) out vec2 textureCoordsOut;
 // ###############################################
 
 uniform vec2 screenSize;
+uniform mat4 orthoProjection;
 
 // ###############################################
 //                     Main Logic
@@ -72,9 +73,10 @@ void main()
     // Normalize Position
     {
         vec2 vertexPos = vertices[gl_VertexID];
-        vertexPos.y = -vertexPos.y + screenSize.y;
-        vertexPos = 2.0 * (vertexPos / screenSize) - 1.0;
-        gl_Position = vec4(vertexPos, 0.0, 1.0);
+        // vertexPos.y = -vertexPos.y + screenSize.y;
+        // vertexPos = 2.0 * (vertexPos / screenSize) - 1.0;
+        // gl_Position = vec4(vertexPos, 0.0, 1.0);
+        gl_Position = orthoProjection * vec4(vertexPos, 0.0, 1.0);
     }
 
     textureCoordsOut = textureCoords[gl_VertexID];
