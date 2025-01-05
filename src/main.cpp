@@ -1,6 +1,6 @@
 #include "libs/libs.hpp"
 #include "input.hpp"
-#include "game.cpp"
+#include "game.hpp"
 
 #define APIENTRY
 #define GL_GLEXT_PROTOTYPES
@@ -23,18 +23,45 @@
 #include "gl_renderer.cpp"
 
 // ###############################################
-//                     Globals
+//                     Game DLL Stuff
+// ###############################################
+
+// This is the function pointer to update_game in game.cpp
+typedef decltype(update_game) update_game_type;
+static update_game_type* update_game_ptr;
+
+// ###############################################
+//                     Functions
+// ###############################################
+
+void reload_game_dll(BumpAllocator* transientStorage);
+
+// ###############################################
+//                     Main Logic
 // ###############################################
 
 int main()
 {
-    // Create 50MB of memory
+    // Create 50MB of memory that is transient (resets each game loop) and persistent.
     BumpAllocator transientStorage = make_bump_allocator(MB(50));
+    BumpAllocator persistentStorage = make_bump_allocator(MB(50));
+
+    input = (Input*)bump_alloc(&persistentStorage, sizeof(Input));
+    if (!input) {
+        FP_ERROR("Failed to allow Input");
+        return -1;
+    }
+
+    renderData = (RenderData*)bump_alloc(&persistentStorage, sizeof(Input));
+    if (!input) {
+        FP_ERROR("Failed to allow Input");
+        return -1;
+    }
 
     // Create the Window
-    input.screenSizeX = 1280;
-    input.screenSizeY = 720;
-    platform_create_window(input.screenSizeX, input.screenSizeY, "My Game");
+    input->screenSizeX = 1280;
+    input->screenSizeY = 720;
+    platform_create_window(input->screenSizeX, input->screenSizeY, "My Game");
     FP_LOG("Window Created");
 
     // Initialize OpenGL
@@ -44,22 +71,65 @@ int main()
     // Main Game Loop
     FP_LOG("======= Game Loop Begin =======");
     while (isRunning) {
+        reload_game_dll(&transientStorage);
+
         // Update the Window
         platform_update_window();
         FP_LOG("Initialized Transient Storage");
 
         // Update Game
-        update_game();
+        update_game(renderData, input);
 
         // Update OpenGL
         gl_render();
 
         // Swap Buffers
         platform_swap_buffers();
+
+        // Reset Storage (as its transient)
+        transientStorage.used = 0;
     }
     FP_LOG("======= Game Loop End =======");
 
     // Return 0 when game loop is done (exitting appliation)
     FP_LOG("Shutdown complete");
     return 0;
+}
+
+// ###############################################
+//                     Game DLL Functions
+// ###############################################
+
+// Wrapper Function
+void update_game(RenderData* renderDataIn, Input* inputIn)
+{
+    update_game_ptr(renderDataIn, inputIn);
+}
+
+void reload_game_dll(BumpAllocator* transientStorage)
+{
+    static void* gameDLL;
+    static long long lastEditTimestampGameDLL;
+
+    long long currentTimestampGameDLL = get_timestamp("game.dll");
+    if (currentTimestampGameDLL > lastEditTimestampGameDLL) {
+        if (gameDLL) {
+            bool freeResult = platform_free_dynamic_library(gameDLL);
+            FP_ASSERT(freeResult, "Failed to free game.dll");
+            gameDLL = nullptr;
+            FP_LOG("Freed game.dll");
+        }
+
+        while (!copy_file("game.dll", "game_load.dll", transientStorage)) {
+            Sleep(10);
+        }
+        FP_LOG("Copied game.dll into game_load.dll");
+
+        gameDLL = platform_load_dynamic_library("game_load.dll");
+        FP_ASSERT(gameDLL, "Failed to load game.dll");
+
+        update_game_ptr = (update_game_type*)platform_load_dynamic_function(gameDLL, "update_game");
+        FP_ASSERT(update_game_ptr, "Failed to load update_game function");
+        lastEditTimestampGameDLL = currentTimestampGameDLL;
+    }
 }
