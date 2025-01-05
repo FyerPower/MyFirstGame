@@ -10,6 +10,7 @@
 //                     Platforms
 // ###############################################
 
+static KeyCodeID KeyCodeLookupTable[KEY_COUNT];
 #include "platform/platform.hpp"
 
 #ifdef _WIN32
@@ -65,10 +66,13 @@ int main()
     }
 
     // Create the Window
-    input->screenSizeX = 1280;
-    input->screenSizeY = 720;
-    platform_create_window(input->screenSizeX, input->screenSizeY, "My Game");
+    input->screenSize.x = 1280;
+    input->screenSize.y = 720;
+    platform_create_window(input->screenSize.x, input->screenSize.y, "My Game");
     FP_LOG("Window Created");
+
+    // Assign keys per platform
+    platform_fill_keycode_lookup_table();
 
     // Initialize OpenGL
     gl_init(&transientStorage);
@@ -81,7 +85,6 @@ int main()
 
         // Update the Window
         platform_update_window();
-        FP_LOG("Initialized Transient Storage");
 
         // Update Game
         update_game(gameState, renderData, input);

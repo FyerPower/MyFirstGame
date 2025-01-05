@@ -9,22 +9,22 @@ template <typename T, int N> struct Array {
 
     T& operator[](int idx)
     {
-        FP_ASSERT(idx >= 0, "idx negative!");
-        FP_ASSERT(idx < count, "Idx out of bounds!");
+        FP_ASSERT((idx >= 0), "idx negative!");
+        FP_ASSERT((idx < count), "Idx out of bounds!");
         return elements[idx];
     }
 
     int add(T element)
     {
-        FP_ASSERT(count < maxElements, "Array Full!");
+        FP_ASSERT((count < maxElements), "Array Full!");
         elements[count] = element;
         return count++;
     }
 
     void remove_idx_and_swap(int idx)
     {
-        FP_ASSERT(idx >= 0, "idx negative!");
-        FP_ASSERT(idx < count, "idx out of bounds!");
+        FP_ASSERT((idx >= 0), "idx negative!");
+        FP_ASSERT((idx < count), "idx out of bounds!");
         elements[idx] = elements[--count];
     }
 

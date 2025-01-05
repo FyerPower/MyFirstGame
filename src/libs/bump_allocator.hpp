@@ -1,21 +1,13 @@
 #pragma once
 
 #include "logger.hpp"
+#include "generic_types.hpp"
 
 // This is to get malloc
 #include <stdlib.h>
 
 // This is to get memset
 #include <string.h>
-
-// ###############################################
-//                     Defines
-// ###############################################
-
-#define BIT(x) 1 << (x)
-#define KB(x) ((unsigned long long)1024 * x)
-#define MB(x) ((unsigned long long)1024 * KB(x))
-#define GB(x) ((unsigned long long)1024 * MB(x))
 
 // ###############################################
 //                     Structs

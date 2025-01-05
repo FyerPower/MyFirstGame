@@ -7,6 +7,11 @@
 struct IVec2 {
     int x;
     int y;
+
+    IVec2 operator-(IVec2 other)
+    {
+        return {x - other.x, y - other.y};
+    }
 };
 
 struct Vec2 {
@@ -74,6 +79,12 @@ struct Mat4 {
     {
         return values[col];
     }
+};
+
+struct OrthographicCamera2D {
+    float zoom = 1.0f;
+    Vec2 dimensions;
+    Vec2 position;
 };
 
 // ###############################################

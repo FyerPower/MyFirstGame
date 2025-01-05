@@ -185,10 +185,10 @@ void gl_render()
     glClearColor(119.0f / 255.0f, 100.0f / 255.0f, 100.0f / 255.0f, 1.0f);
     glClearDepth(0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glViewport(0, 0, input->screenSizeX, input->screenSizeY);
+    glViewport(0, 0, input->screenSize.x, input->screenSize.y);
 
     // Copy screen size to the GPU
-    Vec2 screenSize = {(float)input->screenSizeX, (float)input->screenSizeY};
+    Vec2 screenSize = {(float)input->screenSize.x, (float)input->screenSize.y};
     glUniform2fv(glContext.screenSizeID, 1, &screenSize.x);
 
     // Orthographic Projection
@@ -208,7 +208,7 @@ void gl_render()
         //
         glDrawArraysInstanced(GL_TRIANGLES, 0, 6, renderData->transformCount);
 
-        FP_LOG("Rendering: %i items", renderData->transformCount);
+        // FP_LOG("Rendering: %i items", renderData->transformCount);
 
         // Reset for next Frame
         renderData->transformCount = 0;

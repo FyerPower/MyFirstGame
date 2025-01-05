@@ -31,3 +31,8 @@ bool platform_free_dynamic_library(void* dll)
 {
     // TODO: Implement Linux Platform Function
 }
+
+void platform_fill_keycode_lookup_table()
+{
+    // TODO: Implement Linux Platform Function
+}
