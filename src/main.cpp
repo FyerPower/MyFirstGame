@@ -111,7 +111,7 @@ void reload_game_dll(BumpAllocator* transientStorage)
     static void* gameDLL;
     static long long lastEditTimestampGameDLL;
 
-    long long currentTimestampGameDLL = get_timestamp("game.dll");
+    long long currentTimestampGameDLL = get_timestamp("builds/game.dll");
     if (currentTimestampGameDLL > lastEditTimestampGameDLL) {
         if (gameDLL) {
             bool freeResult = platform_free_dynamic_library(gameDLL);
@@ -120,12 +120,12 @@ void reload_game_dll(BumpAllocator* transientStorage)
             FP_LOG("Freed game.dll");
         }
 
-        while (!copy_file("game.dll", "game_load.dll", transientStorage)) {
+        while (!copy_file("builds/game.dll", "builds/game_load.dll", transientStorage)) {
             Sleep(10);
         }
         FP_LOG("Copied game.dll into game_load.dll");
 
-        gameDLL = platform_load_dynamic_library("game_load.dll");
+        gameDLL = platform_load_dynamic_library("builds/game_load.dll");
         FP_ASSERT(gameDLL, "Failed to load game.dll");
 
         update_game_ptr = (update_game_type*)platform_load_dynamic_function(gameDLL, "update_game");
