@@ -16,7 +16,7 @@
 //                     Constants
 // ###############################################
 
-const char* TEXTURE_PATH = "assets/textures/player/player.png";
+const char* TEXTURE_PATH = "assets/textures/atlas.png";
 
 // ###############################################
 //                     Structs
@@ -147,10 +147,10 @@ bool gl_init(BumpAllocator* transientStorage)
         // Bind (Shader Storage Buffer) at binding (0) to (glContext.transformSBOID)
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, glContext.transformSBOID);
         // Calculate the max size of our buffer based on its contents
-        GLsizeiptr max_buffer_size = sizeof(Transform) * MAX_TRANSFORMS;
+        GLsizeiptr max_buffer_size = sizeof(Transform) * renderData->transforms.maxElements;
         // Create and Initialize our (Shader Storage Buffer) with size (max_buffer_size) using data
         // (renderData.transforms) for use with (drawing)
-        glBufferData(GL_SHADER_STORAGE_BUFFER, max_buffer_size, renderData->transforms, GL_DYNAMIC_DRAW);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, max_buffer_size, renderData->transforms.elements, GL_DYNAMIC_DRAW);
     }
 
     // Uniforms
@@ -167,8 +167,8 @@ bool gl_init(BumpAllocator* transientStorage)
     glDisable(GL_MULTISAMPLE);
 
     // Depth Tesing
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_GREATER);
+    // glEnable(GL_DEPTH_TEST);
+    // glDepthFunc(GL_GREATER);
 
     // Use Program
     glUseProgram(glContext.programID);
@@ -202,15 +202,15 @@ void gl_render()
     // Opaque Objects
     {
         // Copy transforms to the GPU
-        GLsizeiptr buffer_size = sizeof(Transform) * renderData->transformCount;
-        glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, buffer_size, renderData->transforms);
+        GLsizeiptr buffer_size = sizeof(Transform) * renderData->transforms.count;
+        glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, buffer_size, renderData->transforms.elements);
 
         //
-        glDrawArraysInstanced(GL_TRIANGLES, 0, 6, renderData->transformCount);
+        glDrawArraysInstanced(GL_TRIANGLES, 0, 6, renderData->transforms.count);
 
         // FP_LOG("Rendering: %i items", renderData->transformCount);
 
         // Reset for next Frame
-        renderData->transformCount = 0;
+        renderData->transforms.count = 0;
     }
 }
