@@ -1,5 +1,9 @@
 #pragma once
 
+// ###############################################
+// #tag Includes
+// ###############################################
+
 #define GL_GLEXT_PROTOTYPES
 #include "glcorearb.h"
 
@@ -13,31 +17,31 @@
 #include "stb_image.h"
 
 // ###############################################
-//                     Constants
+// #tag Constants
 // ###############################################
 
 const char* TEXTURE_PATH = "assets/textures/atlas.png";
 
 // ###############################################
-//                     Structs
+// #tag Structs
 // ###############################################
 
 struct GLContext {
-    GLuint programID;         //
-    GLuint textureID;         //
+    GLuint programID;         // 1
+    GLuint textureID;         // 2
     GLuint transformSBOID;    // Transform Storage Buffer Object
     GLuint screenSizeID;      // The location of the uniform variable "screenSize"
     GLuint orthoProjectionID; // The location of the uniform variable "orthoProjection"
 };
 
 // ###############################################
-//                     Globals
+// #tag Globals
 // ###############################################
 
 static GLContext glContext;
 
 // ###############################################
-//                     Functions
+// #tag Functions
 // ###############################################
 
 static void APIENTRY gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,

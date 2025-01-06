@@ -1,10 +1,15 @@
 #pragma once
 
+// ###############################################
+// #tag Includes
+// ###############################################
+
 #include "glcorearb.h"
 
 // #############################################################################
-//                           OpenGL Function Pointers
+// #tag OpenGL Function Pointers
 // #############################################################################
+
 static PFNGLCREATEPROGRAMPROC glCreateProgram_ptr;
 static PFNGLDELETETEXTURESPROC glDeleteTextures_ptr;
 static PFNGLGENTEXTURESPROC glGenTextures_ptr;
@@ -122,8 +127,9 @@ void load_gl_functions()
 }
 
 // #############################################################################
-//                           OpenGL Function Wrappers
+// #tag OpenGL Function Wrappers
 // #############################################################################
+
 GLAPI GLuint APIENTRY glCreateProgram(void)
 {
     return glCreateProgram_ptr();

@@ -10,7 +10,7 @@
 // #include <xaudio2.h>
 
 // ###############################################
-//                     Globals
+// #tag Globals
 // ###############################################
 
 static HWND window;
@@ -18,13 +18,13 @@ static HDC dc;
 static PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT_ptr;
 
 // ###############################################
-//                     Functions
+// #tag Functions
 // ###############################################
 
 /**
  * Callback function for Window Events
  */
-LRESULT CALLBACK windows_window_callback(HWND window, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK windows_callback(HWND window, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     LRESULT result = 0;
     switch (msg) {
@@ -100,7 +100,7 @@ bool platform_create_window(int width, int height, char* title)
     wc.hIcon = LoadIcon(instance, IDI_APPLICATION); // Application Icon
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);       // Application Cursor: What style we should have by default
     wc.lpszClassName = title;                       // Application ID: Unique ID for the window
-    wc.lpfnWndProc = windows_window_callback;       // Application Callback: Inputs into the Window
+    wc.lpfnWndProc = windows_callback;              // Application Callback: Inputs into the Window
 
     if (!RegisterClassA(&wc)) {
         return false;

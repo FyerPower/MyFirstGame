@@ -1,3 +1,7 @@
+// ###############################################
+// #tag Includes
+// ###############################################
+
 #include "libs/libs.hpp"
 #include "input.hpp"
 #include "game.hpp"
@@ -7,7 +11,7 @@
 #include "glcorearb.h"
 
 // ###############################################
-//                     Platforms
+// #tag Platforms
 // ###############################################
 
 static KeyCodeID KeyCodeLookupTable[KEY_COUNT];
@@ -24,21 +28,53 @@ static KeyCodeID KeyCodeLookupTable[KEY_COUNT];
 #include "gl_renderer.cpp"
 
 // ###############################################
-//                     Game DLL Stuff
+// #tag Functions
+// ###############################################
+
+// ###############################################
+// #tag Hot-Reloading
 // ###############################################
 
 // This is the function pointer to update_game in game.cpp
 typedef decltype(update_game) update_game_type;
 static update_game_type* update_game_ptr;
 
-// ###############################################
-//                     Functions
-// ###############################################
+// Wrapper Function
+void update_game(GameState* gameStateIn, RenderData* renderDataIn, Input* inputIn)
+{
+    update_game_ptr(gameStateIn, renderDataIn, inputIn);
+}
 
-void reload_game_dll(BumpAllocator* transientStorage);
+void reload_game_dll(BumpAllocator* transientStorage)
+{
+    static void* gameDLL;
+    static long long lastEditTimestampGameDLL;
+
+    long long currentTimestampGameDLL = get_timestamp("builds/game.dll");
+    if (currentTimestampGameDLL > lastEditTimestampGameDLL) {
+        if (gameDLL) {
+            bool freeResult = platform_free_dynamic_library(gameDLL);
+            FP_ASSERT(freeResult, "Failed to free game.dll");
+            gameDLL = nullptr;
+            FP_LOG("Freed game.dll");
+        }
+
+        while (!copy_file("builds/game.dll", "builds/game_load.dll", transientStorage)) {
+            Sleep(10);
+        }
+        FP_LOG("Copied game.dll into game_load.dll");
+
+        gameDLL = platform_load_dynamic_library("builds/game_load.dll");
+        FP_ASSERT(gameDLL, "Failed to load game.dll");
+
+        update_game_ptr = (update_game_type*)platform_load_dynamic_function(gameDLL, "update_game");
+        FP_ASSERT(update_game_ptr, "Failed to load update_game function");
+        lastEditTimestampGameDLL = currentTimestampGameDLL;
+    }
+}
 
 // ###############################################
-//                     Main Logic
+// #tag Main-Logic
 // ###############################################
 
 int main()
@@ -103,42 +139,4 @@ int main()
     // Return 0 when game loop is done (exitting appliation)
     FP_LOG("Shutdown complete");
     return 0;
-}
-
-// ###############################################
-//                     Game DLL Functions
-// ###############################################
-
-// Wrapper Function
-void update_game(GameState* gameStateIn, RenderData* renderDataIn, Input* inputIn)
-{
-    update_game_ptr(gameStateIn, renderDataIn, inputIn);
-}
-
-void reload_game_dll(BumpAllocator* transientStorage)
-{
-    static void* gameDLL;
-    static long long lastEditTimestampGameDLL;
-
-    long long currentTimestampGameDLL = get_timestamp("builds/game.dll");
-    if (currentTimestampGameDLL > lastEditTimestampGameDLL) {
-        if (gameDLL) {
-            bool freeResult = platform_free_dynamic_library(gameDLL);
-            FP_ASSERT(freeResult, "Failed to free game.dll");
-            gameDLL = nullptr;
-            FP_LOG("Freed game.dll");
-        }
-
-        while (!copy_file("builds/game.dll", "builds/game_load.dll", transientStorage)) {
-            Sleep(10);
-        }
-        FP_LOG("Copied game.dll into game_load.dll");
-
-        gameDLL = platform_load_dynamic_library("builds/game_load.dll");
-        FP_ASSERT(gameDLL, "Failed to load game.dll");
-
-        update_game_ptr = (update_game_type*)platform_load_dynamic_function(gameDLL, "update_game");
-        FP_ASSERT(update_game_ptr, "Failed to load update_game function");
-        lastEditTimestampGameDLL = currentTimestampGameDLL;
-    }
 }

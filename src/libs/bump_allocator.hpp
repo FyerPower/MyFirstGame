@@ -1,5 +1,9 @@
 #pragma once
 
+// ###############################################
+// #tag Includes
+// ###############################################
+
 #include "logger.hpp"
 #include "generic_types.hpp"
 
@@ -10,7 +14,7 @@
 #include <string.h>
 
 // ###############################################
-//                     Structs
+// #tag Structs
 // ###############################################
 
 struct BumpAllocator {
@@ -20,7 +24,7 @@ struct BumpAllocator {
 };
 
 // ###############################################
-//                     Functions
+// #tag Functions
 // ###############################################
 
 BumpAllocator make_bump_allocator(size_t size)

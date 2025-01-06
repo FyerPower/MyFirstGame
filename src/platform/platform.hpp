@@ -1,13 +1,13 @@
 #pragma once
 
 // ###############################################
-//                     Globals
+// #tag Globals
 // ###############################################
 
 static bool isRunning = true;
 
 // ###############################################
-//                     Functions
+// #tag Functions
 // ###############################################
 
 bool platform_create_window(int width, int height, char* title);

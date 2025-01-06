@@ -1,19 +1,23 @@
+// ###############################################
+// #tag Includes
+// ###############################################
+
 #include "libs/libs.hpp"
 #include "game.hpp"
 #include "assets.hpp"
 #include "render_interface.hpp"
 
-// #############################################################################
-//                           Game Constants
-// #############################################################################
+// ###############################################
+// #tag Constants
+// ###############################################
 
-// #############################################################################
-//                           Game Structs
-// #############################################################################
+// ###############################################
+// #tag Structs
+// ###############################################
 
-// #############################################################################
-//                           Game Functions
-// #############################################################################
+// ###############################################
+// #tag Functions
+// ###############################################
 
 Tile* get_tile(int x, int y)
 {
@@ -119,9 +123,9 @@ void handleInputActions()
     }
 }
 
-// #############################################################################
-//                           Game Functions(exposed)
-// #############################################################################
+// ###############################################
+// Game Functions (exposed)
+// ###############################################
 
 EXPORT_FN void update_game(GameState* gameStateIn, RenderData* renderDataIn, Input* inputIn)
 {
@@ -148,12 +152,22 @@ EXPORT_FN void update_game(GameState* gameStateIn, RenderData* renderDataIn, Inp
 
     // Drawing Tileset
     {
-        // Neighbouring Tiles        Top    Left      Right       Bottom
-        int neighbourOffsets[24] = {0, -1, -1, 0, 1, 0, 0, 1,
-                                    // Topleft Topright Bottomleft Bottomright
-                                    -1, -1, 1, -1, -1, 1, 1, 1,
-                                    // Top2   Left2     Right2      Bottom2
-                                    0, -2, -2, 0, 2, 0, 0, 2};
+        // Neighbouring Tiles
+        int neighbourOffsets[24] = {
+            0,  -1, // Top
+            -1, 0,  // Left
+            1,  0,  // Right
+            0,  1,  // Bottom
+            -1, -1, // Top-Left
+            1,  -1, // Top-Right
+            -1, 1,  // Bottom-Left
+            1,  1,  // Bottom-Right
+            0,  -2, // Top2
+            -2, 0,  // Left2
+            2,  0,  // Right2
+            0,  2   // Bottom2
+        };
+
         // Topleft     = BIT(4) = 16
         // Toplright   = BIT(5) = 32
         // Bottomleft  = BIT(6) = 64

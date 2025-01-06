@@ -1,6 +1,14 @@
 #pragma once
 
+// ###############################################
+// #tag Includes
+// ###############################################
+
 #include "logger.hpp"
+
+// ###############################################
+// #tag Implementation
+// ###############################################
 
 template <typename T, int N> struct Array {
     static constexpr int maxElements = N;

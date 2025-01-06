@@ -1,5 +1,9 @@
 #pragma once
 
+// ###############################################
+// #tag Includes
+// ###############################################
+
 #include "bump_allocator.hpp"
 #include "logger.hpp"
 
@@ -10,7 +14,7 @@
 #include <string.h>
 
 // ###############################################
-//                     Functions
+// #tag Functions
 // ###############################################
 
 long long get_timestamp(const char* filePath)
