@@ -32,6 +32,9 @@ struct GLContext {
     GLuint transformSBOID;    // Transform Storage Buffer Object
     GLuint screenSizeID;      // The location of the uniform variable "screenSize"
     GLuint orthoProjectionID; // The location of the uniform variable "orthoProjection"
+
+    long long textureTimestamp;
+    long long shaderTimestamp;
 };
 
 // ###############################################
@@ -61,8 +64,8 @@ GLuint gl_create_shaders(GLenum shaderType, char* shaderPath, BumpAllocator* tra
     GLuint shaderId = glCreateShader(shaderType);
     char* shader = read_file(shaderPath, &fileSize, transientStorage);
     if (!shader) {
-        FP_ASSERT(false, "Failed to load shaders.");
-        return false;
+        FP_ASSERT(false, "Failed to load shader: %s", shaderPath);
+        return 0;
     }
     glShaderSource(shaderId, 1, &shader, 0);
     glCompileShader(shaderId);
@@ -74,25 +77,36 @@ GLuint gl_create_shaders(GLenum shaderType, char* shaderPath, BumpAllocator* tra
         if (!success) {
             glGetShaderInfoLog(shaderId, 2048, 0, shaderLog);
             FP_ASSERT(false, "Failed to compile Shaders %s", shaderLog);
+            return 0;
         }
     }
 
     return shaderId;
 };
 
-bool gl_init(BumpAllocator* transientStorage)
+bool has_updated_shaders()
 {
-    // Load all OpenGL Functions
-    load_gl_functions();
+    long long timestampVert = get_timestamp("assets/shaders/quad.vert");
+    long long timestampFrag = get_timestamp("assets/shaders/quad.frag");
+    return timestampVert > glContext.shaderTimestamp || timestampFrag > glContext.shaderTimestamp;
+}
 
-    // Register callback method that will handle debug messaging within OpenGL
-    glDebugMessageCallback(&gl_debug_callback, nullptr);
-    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-    glEnable(GL_DEBUG_OUTPUT);
+bool load_shaders(BumpAllocator* transientStorage)
+{
+    FP_LOG("Loading Shaders");
 
     // create our shaders
     GLuint vertShaderID = gl_create_shaders(GL_VERTEX_SHADER, "assets/shaders/quad.vert", transientStorage);
     GLuint fragShaderID = gl_create_shaders(GL_FRAGMENT_SHADER, "assets/shaders/quad.frag", transientStorage);
+
+    if (!vertShaderID || !fragShaderID) {
+        FP_ASSERT(false, "Failed to create shaders");
+        return false;
+    }
+
+    long long timestampVert = get_timestamp("assets/shaders/quad.vert");
+    long long timestampFrag = get_timestamp("assets/shaders/quad.frag");
+    glContext.shaderTimestamp = fmax(timestampVert, timestampFrag);
 
     // Create the OpenGL Program, attach shaders, and link to the context
     glContext.programID = glCreateProgram();
@@ -106,6 +120,64 @@ bool gl_init(BumpAllocator* transientStorage)
     glDeleteShader(vertShaderID);
     glDeleteShader(fragShaderID);
 
+    return true;
+}
+
+bool has_updated_textures()
+{
+    long long currentTimestamp = get_timestamp(TEXTURE_PATH);
+    return currentTimestamp > glContext.textureTimestamp;
+}
+
+bool load_textures()
+{
+    FP_LOG("Loading Textures");
+
+    int width, height, channels;
+    unsigned char* data = stbi_load(TEXTURE_PATH,  // Filename,
+                                    &width,        // X Position
+                                    &height,       // Y Position
+                                    &channels,     // Comp (Number of channels)
+                                    STBI_rgb_alpha // Req Comp (Number of channels required)
+    );
+
+    if (!data) {
+        FP_ASSERT(false, "Failed to Load Image")
+        return false;
+    }
+
+    // Load Texture into GPU
+    glActiveTexture(GL_TEXTURE0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+    // Free the Image from memory
+    stbi_image_free(data);
+
+    // Update our timestamp
+    glContext.textureTimestamp = get_timestamp(TEXTURE_PATH);
+
+    FP_LOG("Successfully Loaded Textures(%s) Width(%d) Height(%d) Channels(%d)", TEXTURE_PATH, width, height, channels);
+    return true;
+}
+
+// ###############################################
+// #tag Init_and_Render
+// ###############################################
+
+bool gl_init(BumpAllocator* transientStorage)
+{
+    // Load all OpenGL Functions
+    load_gl_functions();
+
+    // Register callback method that will handle debug messaging within OpenGL
+    glDebugMessageCallback(&gl_debug_callback, nullptr);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glEnable(GL_DEBUG_OUTPUT);
+
+    if (!load_shaders(transientStorage)) {
+        return false;
+    }
+
     // This has to be done, otherwise OpenGL will not draw anything
     GLuint VAO;
     glGenVertexArrays(1, &VAO);
@@ -113,19 +185,6 @@ bool gl_init(BumpAllocator* transientStorage)
 
     // Texture Loading with STBImage
     {
-        int width, height, channels;
-        char* data = (char*)stbi_load(TEXTURE_PATH, // Filename,
-                                      &width,       // X Position
-                                      &height,      // Y Position
-                                      &channels,    // Comp (Number of channels)
-                                      4             // Req Comp (Number of channels required)
-        );
-
-        if (!data) {
-            FP_ASSERT(false, "Failed to Load Image")
-            return false;
-        }
-
         // Generate the texture and store the result into our glContext.textureID
         glGenTextures(1, &glContext.textureID);
         // Set our texture as Active (Slot 0 - refers to the shaders "location=0")
@@ -139,9 +198,9 @@ bool gl_init(BumpAllocator* transientStorage)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB8_ALPHA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-
-        stbi_image_free(data);
+        if (!load_textures()) {
+            return false;
+        }
     }
 
     // Transform Storage Buffer
@@ -163,16 +222,16 @@ bool gl_init(BumpAllocator* transientStorage)
         glContext.orthoProjectionID = glGetUniformLocation(glContext.programID, "orthoProjection");
     }
 
-    // sRGB output (even if input texture is non-sRGB -> don't rely on texture used)
-    // Your font is not using sRGB, for example (not that it matters there, because no actual color is sampled from it)
-    // But this could prevent some future bug when you start mixing different types of textures
-    // Of course, you still need to correctly set the image file source format when using glTexImage2D()
-    glEnable(GL_FRAMEBUFFER_SRGB);
+    // Disable MultiSampling (aka Anti-Aliasing)
     glDisable(GL_MULTISAMPLE);
 
     // Depth Tesing
     // glEnable(GL_DEPTH_TEST);
     // glDepthFunc(GL_GREATER);
+
+    // Allows for transparent textures to be rendered as transparent instead of solid.
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // Use Program
     glUseProgram(glContext.programID);
@@ -184,8 +243,18 @@ bool gl_init(BumpAllocator* transientStorage)
 /**
  *
  */
-void gl_render()
+void gl_render(BumpAllocator* transientStorage)
 {
+    if (has_updated_textures()) {
+        Sleep(100);
+        if (!load_textures()) {
+            return;
+        }
+    }
+    if (has_updated_shaders() && !load_shaders(transientStorage)) {
+        return;
+    }
+
     glClearColor(119.0f / 255.0f, 100.0f / 255.0f, 100.0f / 255.0f, 1.0f);
     glClearDepth(0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

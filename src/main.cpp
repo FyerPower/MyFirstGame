@@ -126,7 +126,7 @@ int main()
         update_game(gameState, renderData, input);
 
         // Update OpenGL
-        gl_render();
+        gl_render(&transientStorage);
 
         // Swap Buffers
         platform_swap_buffers();

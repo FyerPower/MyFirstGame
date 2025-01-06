@@ -1,5 +1,7 @@
 #pragma once
 
+#include <random>
+
 // ###############################################
 // #tag Structs
 // ###############################################
@@ -108,3 +110,16 @@ Mat4 orthographic_projection(float left, float right, float top, float bottom)
     result[3][3] = 1.0f;
     return result;
 }
+
+class Math
+{
+  public:
+    // See: https://stackoverflow.com/questions/7114043/random-number-generation-in-c11-how-to-generate-how-does-it-work
+    static int random(int minValue, int maxValue)
+    {
+        std::random_device dev; // Seed
+        std::mt19937 rng(dev());
+        std::uniform_int_distribution<std::mt19937::result_type> dist6(minValue, maxValue);
+        return dist6(rng);
+    }
+};

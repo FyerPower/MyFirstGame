@@ -7,5 +7,9 @@
             "src/*",
             "build.sh"
         ],
+    },
+    "files.associations": {
+        "iostream": "cpp",
+        "random": "cpp"
     }
 }

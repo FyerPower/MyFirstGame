@@ -179,6 +179,8 @@ EXPORT_FN void update_game(GameState* gameStateIn, RenderData* renderDataIn, Inp
                 bgTransformation.pos = {x * (float)TILESIZE, y * (float)TILESIZE};
                 bgTransformation.size = {16, 16};
                 bgTransformation.spriteSize = {16, 16};
+                // int randomTextureOffset[6] = {0, 0, 0, 16, 32, 48};
+                // bgTransformation.atlasOffset = {192, randomTextureOffset[Math::random(0, 5)]};
                 bgTransformation.atlasOffset = {192, 0};
                 draw_quad(bgTransformation);
 
