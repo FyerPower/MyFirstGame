@@ -13,9 +13,12 @@
 // ###############################################
 
 constexpr int WORLD_WIDTH = 320;
-constexpr int WORLD_HEIGHT = 180;
+constexpr int WORLD_HEIGHT = 160;
 constexpr int TILESIZE = 16;
 constexpr IVec2 WORLD_GRID = {WORLD_WIDTH / TILESIZE, WORLD_HEIGHT / TILESIZE};
+
+constexpr int UPDATES_PER_SECOND = 20;
+constexpr double UPDATE_DELAY = 1.0 / UPDATES_PER_SECOND;
 
 // ###############################################
 // #tag Structs
@@ -41,12 +44,29 @@ struct Tile {
     bool isVisible;
 };
 
+struct Player {
+    IVec2 position;
+    IVec2 previousPosition;
+    int health;
+    int maxHealth = 60;
+    int stamina;
+    int maxStamina = 100;
+};
+
 struct GameState {
     bool initialized = false;
-    IVec2 playerPos;
+    float internalTimer;
+    int tickCounter = 0;
 
+    Player player;
+
+    //
     Array<IVec2, 21> tileCoords;
+
+    // World Grid
     Tile worldGrid[WORLD_GRID.x][WORLD_GRID.y];
+
+    // Key Mapping
     KeyMapping keyMappings[GAME_INPUT_COUNT];
 };
 
@@ -61,5 +81,5 @@ static GameState* gameState;
 // ###############################################
 
 extern "C" {
-EXPORT_FN void update_game(GameState* gameStateIn, RenderData* renderDataIn, Input* inputIn);
+EXPORT_FN void update_game(GameState* gameStateIn, RenderData* renderDataIn, Input* inputIn, float deltaTime);
 }

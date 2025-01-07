@@ -281,9 +281,9 @@ void gl_render(BumpAllocator* transientStorage)
         //
         glDrawArraysInstanced(GL_TRIANGLES, 0, 6, renderData->transforms.count);
 
-        // FP_LOG("Rendering: %i items", renderData->transformCount);
+        // FP_LOG("Rendering: %i items", renderData->transforms.count);
 
         // Reset for next Frame
-        renderData->transforms.count = 0;
+        renderData->transforms.clear();
     }
 }

@@ -10,6 +10,9 @@
 #define GL_GLEXT_PROTOTYPES
 #include "glcorearb.h"
 
+// Used to get Delta Time
+#include <chrono>
+
 // ###############################################
 // #tag Platforms
 // ###############################################
@@ -31,6 +34,17 @@ static KeyCodeID KeyCodeLookupTable[KEY_COUNT];
 // #tag Functions
 // ###############################################
 
+double get_delta_time()
+{
+    // Only executed once when entering the function (static)
+    static auto lastTime = std::chrono::steady_clock::now();
+    auto currentTime = std::chrono::steady_clock::now();
+    // seconds
+    double delta = std::chrono::duration<double>(currentTime - lastTime).count();
+    lastTime = currentTime;
+    return delta;
+}
+
 // ###############################################
 // #tag Hot-Reloading
 // ###############################################
@@ -40,9 +54,9 @@ typedef decltype(update_game) update_game_type;
 static update_game_type* update_game_ptr;
 
 // Wrapper Function
-void update_game(GameState* gameStateIn, RenderData* renderDataIn, Input* inputIn)
+void update_game(GameState* gameStateIn, RenderData* renderDataIn, Input* inputIn, float deltaTime)
 {
-    update_game_ptr(gameStateIn, renderDataIn, inputIn);
+    update_game_ptr(gameStateIn, renderDataIn, inputIn, deltaTime);
 }
 
 void reload_game_dll(BumpAllocator* transientStorage)
@@ -117,13 +131,17 @@ int main()
     // Main Game Loop
     FP_LOG("======= Game Loop Begin =======");
     while (isRunning) {
+        // Get Delta Time
+        float dt = get_delta_time();
+
+        // Check to see if the Game.DLL needs updating and update accordingly
         reload_game_dll(&transientStorage);
 
         // Update the Window
         platform_update_window();
 
         // Update Game
-        update_game(gameState, renderData, input);
+        update_game(gameState, renderData, input, dt);
 
         // Update OpenGL
         gl_render(&transientStorage);

@@ -36,3 +36,8 @@ void platform_fill_keycode_lookup_table()
 {
     // TODO: Implement Mac Platform Function
 }
+
+void platform_set_vsync(bool vSync)
+{
+    // TODO: Implement Mac Platform Function
+}

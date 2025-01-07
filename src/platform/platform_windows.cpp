@@ -1,6 +1,7 @@
 #pragma once
 
 #include "platform.hpp"
+#include "../input.hpp"
 #include "../libs/libs.hpp"
 
 #define WIN32_LEAN_AND_MEAN
@@ -301,15 +302,6 @@ bool platform_create_window(int width, int height, char* title)
  */
 void platform_update_window()
 {
-    // Clear the transitionCount for every key
-    {
-        for (int keyCode = 0; keyCode < KEY_COUNT; keyCode++) {
-            input->keys[keyCode].justReleased = false;
-            input->keys[keyCode].justPressed = false;
-            input->keys[keyCode].halfTransitionCount = 0;
-        }
-    }
-
     MSG msg;
     while (PeekMessageA(&msg, window, 0, 0, PM_REMOVE)) {
         TranslateMessage(&msg);
@@ -321,10 +313,8 @@ void platform_update_window()
         POINT point = {};
         GetCursorPos(&point);
         ScreenToClient(window, &point);
-        input->prevMousePos = input->mousePos;
         input->mousePos.x = point.x;
         input->mousePos.y = point.y;
-        input->relMouse = input->mousePos - input->prevMousePos;
 
         // Mouse Position World
         input->mousePosWorld = screen_to_world(input->mousePos);
@@ -471,4 +461,9 @@ void platform_fill_keycode_lookup_table()
     KeyCodeLookupTable[VK_NUMPAD7] = KEY_NUMPAD_7;
     KeyCodeLookupTable[VK_NUMPAD8] = KEY_NUMPAD_8;
     KeyCodeLookupTable[VK_NUMPAD9] = KEY_NUMPAD_9;
-}
+};
+
+void platform_set_vsync(bool vSync)
+{
+    wglSwapIntervalEXT_ptr(vSync);
+};
