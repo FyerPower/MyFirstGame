@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# rm -f builds/game* # Remove game_* files
+
 libs="-luser32 -lopengl32 -lgdi32"
 warnings="-Wno-writable-strings -Wno-format-security -Wno-deprecated-declarations"
 includes="-Ithird_party -Ithird_party/opengl"

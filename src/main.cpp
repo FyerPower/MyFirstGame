@@ -97,21 +97,26 @@ int main()
     BumpAllocator transientStorage = make_bump_allocator(MB(50));
     BumpAllocator persistentStorage = make_bump_allocator(MB(50));
 
-    input = (Input*)bump_alloc(&persistentStorage, sizeof(Input));
-    if (!input) {
-        FP_ERROR("Failed to allow Input");
+    // Allocate the GameState into Memory
+    void* gameState_ptr = bump_alloc(&persistentStorage, sizeof(GameState));
+    if (!gameState_ptr) {
+        FP_ERROR("Failed to allow GameState");
         return -1;
     }
+    gameState = new (gameState_ptr) GameState();
 
-    renderData = (RenderData*)bump_alloc(&persistentStorage, sizeof(RenderData));
-    if (!renderData) {
+    // Allocate the RenderData into Memory
+    void* renderData_ptr = bump_alloc(&persistentStorage, sizeof(RenderData));
+    if (!renderData_ptr) {
         FP_ERROR("Failed to allow RenderData");
         return -1;
     }
+    renderData = new (renderData_ptr) RenderData();
 
-    gameState = (GameState*)bump_alloc(&persistentStorage, sizeof(GameState));
-    if (!gameState) {
-        FP_ERROR("Failed to allow GameState");
+    // Allocate the Input into Memory
+    input = (Input*)bump_alloc(&persistentStorage, sizeof(Input));
+    if (!input) {
+        FP_ERROR("Failed to allow Input");
         return -1;
     }
 
@@ -132,7 +137,7 @@ int main()
     FP_LOG("======= Game Loop Begin =======");
     while (isRunning) {
         // Get Delta Time
-        float dt = get_delta_time();
+        float deltaTime = get_delta_time();
 
         // Check to see if the Game.DLL needs updating and update accordingly
         reload_game_dll(&transientStorage);
@@ -141,7 +146,7 @@ int main()
         platform_update_window();
 
         // Update Game
-        update_game(gameState, renderData, input, dt);
+        update_game(gameState, renderData, input, deltaTime);
 
         // Update OpenGL
         gl_render(&transientStorage);

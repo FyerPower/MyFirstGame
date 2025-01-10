@@ -12,4 +12,6 @@
 
 #include "math.hpp"
 
+#include "geometry.hpp"
+
 #include "array.hpp"

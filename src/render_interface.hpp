@@ -4,6 +4,7 @@
 // #tag Imcludes
 // ###############################################
 
+#include "game/camera.hpp"
 #include "assets.hpp"
 
 // #############################################################################
@@ -23,7 +24,9 @@ struct Transform {
 };
 
 // A store for all of our Rendered Objects
-struct RenderData {
+class RenderData
+{
+  public:
     OrthographicCamera2D gameCamera;
     OrthographicCamera2D uiCamera;
 
@@ -40,18 +43,28 @@ static RenderData* renderData;
 // #tag Utilities
 // #############################################################################
 
+/**
+ * Convert a screen position to a world position using the game camera.
+ * Given the top left corner of the screen is (0, 0) and the bottom right is (screenSize.x, screenSize.y)
+ * Given the top left corner of the camera is (camera.position.x - camera.dimensions.x / 2, camera.position.y + camera.dimensions.y / 2)
+ * Given the bottom right corner of the camera is (camera.position.x + camera.dimensions.x / 2, camera.position.y - camera.dimensions.y / 2)
+ */
 IVec2 screen_to_world(IVec2 screenPos)
 {
-    OrthographicCamera2D camera = renderData->gameCamera;
+    // Get the zoomed dimensions of the camera
+    Vec2 zoomedDimensions = renderData->gameCamera.getZoomedDimensions();
 
-    int xPos = (float)screenPos.x / (float)input->screenSize.x * camera.dimensions.x; // [0; dimensions.x]
-    // Offset using dimensions and position
-    xPos += -camera.dimensions.x / 2.0f + camera.position.x;
+    // Calculate the scale of the camera
+    Vec2 scale = zoomedDimensions / vec_2(input->screenSize);
 
-    int yPos = (float)screenPos.y / (float)input->screenSize.y * camera.dimensions.y; // [0; dimensions.y]
-    // Offset using dimensions and position
-    yPos += camera.dimensions.y / 2.0f + camera.position.y;
-    return {xPos, yPos};
+    // Calculate the offset of the camera
+    Vec2 offset = renderData->gameCamera.position;
+
+    // Calculate the world position
+    IVec2 worldPos = {(int)(screenPos.x * scale.x + offset.x), (int)(screenPos.y * scale.y - offset.y)};
+
+    // Return the world position relative to the top left corner of the screen
+    return {worldPos.x - ((int)zoomedDimensions.x / 2), worldPos.y - ((int)zoomedDimensions.y / 2)};
 };
 
 // #############################################################################

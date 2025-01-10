@@ -8,17 +8,9 @@
 #include "input.hpp"
 #include "render_interface.hpp"
 
-// ###############################################
-// #tag Constants
-// ###############################################
-
-constexpr int WORLD_WIDTH = 320;
-constexpr int WORLD_HEIGHT = 160;
-constexpr int TILESIZE = 16;
-constexpr IVec2 WORLD_GRID = {WORLD_WIDTH / TILESIZE, WORLD_HEIGHT / TILESIZE};
-
-constexpr int UPDATES_PER_SECOND = 20;
-constexpr double UPDATE_DELAY = 1.0 / UPDATES_PER_SECOND;
+#include "game/config.hpp"
+#include "game/player.hpp"
+#include "game/world.hpp"
 
 // ###############################################
 // #tag Structs
@@ -32,6 +24,8 @@ enum GameInputType {
     JUMP,
     MOUSE_LEFT,
     MOUSE_RIGHT,
+    MOUSE_SCROLL_UP,
+    MOUSE_SCROLL_DOWN,
     GAME_INPUT_COUNT
 };
 
@@ -39,35 +33,26 @@ struct KeyMapping {
     Array<KeyCodeID, 3> keys;
 };
 
-struct Tile {
-    int neighbourMask;
-    bool isVisible;
-};
-
-struct Player {
-    IVec2 position;
-    IVec2 previousPosition;
-    int health;
-    int maxHealth = 60;
-    int stamina;
-    int maxStamina = 100;
-};
-
 struct GameState {
+  public:
     bool initialized = false;
     float internalTimer;
     int tickCounter = 0;
 
-    Player player;
+    Player* player;
+    World* world;
 
     //
     Array<IVec2, 21> tileCoords;
 
-    // World Grid
-    Tile worldGrid[WORLD_GRID.x][WORLD_GRID.y];
-
     // Key Mapping
     KeyMapping keyMappings[GAME_INPUT_COUNT];
+
+    GameState()
+    {
+        world = new World();
+        player = new Player();
+    }
 };
 
 // ###############################################

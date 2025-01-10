@@ -47,11 +47,9 @@ static GLContext glContext;
 // #tag Functions
 // ###############################################
 
-static void APIENTRY gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
-                                       const GLchar* message, const void* user)
+static void APIENTRY gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* user)
 {
-    if (severity == GL_DEBUG_SEVERITY_LOW || severity == GL_DEBUG_SEVERITY_MEDIUM ||
-        severity == GL_DEBUG_SEVERITY_HIGH) {
+    if (severity == GL_DEBUG_SEVERITY_LOW || severity == GL_DEBUG_SEVERITY_MEDIUM || severity == GL_DEBUG_SEVERITY_HIGH) {
         FP_ASSERT(false, "OpenGL Error: %s", message);
     } else {
         FP_LOG((char*)message);
@@ -266,10 +264,12 @@ void gl_render(BumpAllocator* transientStorage)
 
     // Orthographic Projection
     OrthographicCamera2D camera = renderData->gameCamera;
-    Mat4 orthoProjection = orthographic_projection(camera.position.x - camera.dimensions.x / 2.0f,  // left
-                                                   camera.position.x + camera.dimensions.x / 2.0f,  // right
-                                                   camera.position.y - camera.dimensions.y / 2.0f,  // top
-                                                   camera.position.y + camera.dimensions.y / 2.0f); // bottom
+    Vec2 zoomedDimensions = camera.getZoomedDimensions();
+    Mat4 orthoProjection = Geometry::orthographic_projection(camera.position.x - zoomedDimensions.x / 2.0f,  // left
+                                                             camera.position.x + zoomedDimensions.x / 2.0f,  // right
+                                                             camera.position.y - zoomedDimensions.y / 2.0f,  // top
+                                                             camera.position.y + zoomedDimensions.y / 2.0f); // bottom
+
     glUniformMatrix4fv(glContext.orthoProjectionID, 1, GL_FALSE, &orthoProjection.ax);
 
     // Opaque Objects

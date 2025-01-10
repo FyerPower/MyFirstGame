@@ -53,11 +53,9 @@ char* bump_alloc(BumpAllocator* bumpAllocator, size_t size)
     char* result = nullptr;
 
     // Ensure that the first 4 bits are set to 0
-    // TODO: Should this actually be 15 instead of 7?
-    // https://www.youtube.com/watch?v=S96DCaV5X2M&lc=UgzB9tnvc0BpUbuGe9N4AaABAg.9vEtOz7Cab59vhQkRoUQ5h
     size_t allignedSize = (size + 7) & ~7;
 
-    // if memory has enough room for what we want to alloc, we're good!
+    // If memory has enough room for what we want to alloc, we're good!
     if (bumpAllocator->used + allignedSize <= bumpAllocator->capacity) {
         result = bumpAllocator->memory + bumpAllocator->used;
         bumpAllocator->used += allignedSize;
@@ -67,3 +65,11 @@ char* bump_alloc(BumpAllocator* bumpAllocator, size_t size)
 
     return result;
 };
+
+void free_bump_allocator(BumpAllocator* bumpAllocator)
+{
+    free(bumpAllocator->memory);
+    bumpAllocator->memory = nullptr;
+    bumpAllocator->capacity = 0;
+    bumpAllocator->used = 0;
+}

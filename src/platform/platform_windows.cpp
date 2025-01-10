@@ -78,7 +78,25 @@ LRESULT CALLBACK windows_callback(HWND window, UINT msg, WPARAM wParam, LPARAM l
             key->isDown = isDown;
             key->halfTransitionCount++;
 
-            FP_LOG("Mouse Event Triggered.. keyCode(%d) isDown(%d)", (int)wParam, isDown);
+            // FP_LOG("Mouse Event Triggered.. keyCode(%d) isDown(%d)", (int)wParam, isDown);
+            break;
+        }
+
+        case WM_MOUSEWHEEL: {
+            KeyCodeID keyCode;
+            bool isDown = true;
+            int delta = GET_WHEEL_DELTA_WPARAM(wParam);
+
+            if (delta > 0) {
+                keyCode = KEY_MOUSE_SCROLL_UP;
+            } else if (delta < 0) {
+                keyCode = KEY_MOUSE_SCROLL_DOWN;
+            }
+            Key* key = &input->keys[keyCode];
+            key->justPressed = !key->justPressed && !key->isDown && isDown;
+            key->justReleased = !key->justReleased && key->isDown && !isDown;
+            key->isDown = isDown;
+            key->halfTransitionCount++;
             break;
         }
 
@@ -174,8 +192,7 @@ bool platform_create_window(int width, int height, char* title)
         }
 
         wglChoosePixelFormatARB = (PFNWGLCHOOSEPIXELFORMATARBPROC)platform_load_gl_function("wglChoosePixelFormatARB");
-        wglCreateContextAttribsARB =
-            (PFNWGLCREATECONTEXTATTRIBSARBPROC)platform_load_gl_function("wglCreateContextAttribsARB");
+        wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)platform_load_gl_function("wglCreateContextAttribsARB");
         wglSwapIntervalEXT_ptr = (PFNWGLSWAPINTERVALEXTPROC)platform_load_gl_function("wglSwapIntervalEXT");
 
         if (!wglCreateContextAttribsARB || !wglChoosePixelFormatARB) {
@@ -412,31 +429,23 @@ void platform_fill_keycode_lookup_table()
     KeyCodeLookupTable['8'] = KEY_8;
     KeyCodeLookupTable['9'] = KEY_9;
 
-    KeyCodeLookupTable[VK_SPACE] = KEY_SPACE, KeyCodeLookupTable[VK_OEM_3] = KEY_TICK,
-    KeyCodeLookupTable[VK_OEM_MINUS] = KEY_MINUS, KeyCodeLookupTable[VK_OEM_PLUS] = KEY_EQUAL,
-    KeyCodeLookupTable[VK_OEM_4] = KEY_LEFT_BRACKET, KeyCodeLookupTable[VK_OEM_6] = KEY_RIGHT_BRACKET,
-    KeyCodeLookupTable[VK_OEM_1] = KEY_SEMICOLON, KeyCodeLookupTable[VK_OEM_7] = KEY_QUOTE,
-    KeyCodeLookupTable[VK_OEM_COMMA] = KEY_COMMA, KeyCodeLookupTable[VK_OEM_PERIOD] = KEY_PERIOD,
-    KeyCodeLookupTable[VK_OEM_2] = KEY_FORWARD_SLASH, KeyCodeLookupTable[VK_OEM_5] = KEY_BACKWARD_SLASH,
-    KeyCodeLookupTable[VK_TAB] = KEY_TAB, KeyCodeLookupTable[VK_ESCAPE] = KEY_ESCAPE,
-    KeyCodeLookupTable[VK_PAUSE] = KEY_PAUSE, KeyCodeLookupTable[VK_UP] = KEY_UP,
-    KeyCodeLookupTable[VK_DOWN] = KEY_DOWN, KeyCodeLookupTable[VK_LEFT] = KEY_LEFT,
-    KeyCodeLookupTable[VK_RIGHT] = KEY_RIGHT, KeyCodeLookupTable[VK_BACK] = KEY_BACKSPACE,
-    KeyCodeLookupTable[VK_RETURN] = KEY_RETURN, KeyCodeLookupTable[VK_DELETE] = KEY_DELETE,
-    KeyCodeLookupTable[VK_INSERT] = KEY_INSERT, KeyCodeLookupTable[VK_HOME] = KEY_HOME,
-    KeyCodeLookupTable[VK_END] = KEY_END, KeyCodeLookupTable[VK_PRIOR] = KEY_PAGE_UP,
-    KeyCodeLookupTable[VK_NEXT] = KEY_PAGE_DOWN, KeyCodeLookupTable[VK_CAPITAL] = KEY_CAPS_LOCK,
-    KeyCodeLookupTable[VK_NUMLOCK] = KEY_NUM_LOCK, KeyCodeLookupTable[VK_SCROLL] = KEY_SCROLL_LOCK,
+    KeyCodeLookupTable[VK_SPACE] = KEY_SPACE, KeyCodeLookupTable[VK_OEM_3] = KEY_TICK, KeyCodeLookupTable[VK_OEM_MINUS] = KEY_MINUS,
+    KeyCodeLookupTable[VK_OEM_PLUS] = KEY_EQUAL, KeyCodeLookupTable[VK_OEM_4] = KEY_LEFT_BRACKET, KeyCodeLookupTable[VK_OEM_6] = KEY_RIGHT_BRACKET,
+    KeyCodeLookupTable[VK_OEM_1] = KEY_SEMICOLON, KeyCodeLookupTable[VK_OEM_7] = KEY_QUOTE, KeyCodeLookupTable[VK_OEM_COMMA] = KEY_COMMA,
+    KeyCodeLookupTable[VK_OEM_PERIOD] = KEY_PERIOD, KeyCodeLookupTable[VK_OEM_2] = KEY_FORWARD_SLASH, KeyCodeLookupTable[VK_OEM_5] = KEY_BACKWARD_SLASH,
+    KeyCodeLookupTable[VK_TAB] = KEY_TAB, KeyCodeLookupTable[VK_ESCAPE] = KEY_ESCAPE, KeyCodeLookupTable[VK_PAUSE] = KEY_PAUSE,
+    KeyCodeLookupTable[VK_UP] = KEY_UP, KeyCodeLookupTable[VK_DOWN] = KEY_DOWN, KeyCodeLookupTable[VK_LEFT] = KEY_LEFT,
+    KeyCodeLookupTable[VK_RIGHT] = KEY_RIGHT, KeyCodeLookupTable[VK_BACK] = KEY_BACKSPACE, KeyCodeLookupTable[VK_RETURN] = KEY_RETURN,
+    KeyCodeLookupTable[VK_DELETE] = KEY_DELETE, KeyCodeLookupTable[VK_INSERT] = KEY_INSERT, KeyCodeLookupTable[VK_HOME] = KEY_HOME,
+    KeyCodeLookupTable[VK_END] = KEY_END, KeyCodeLookupTable[VK_PRIOR] = KEY_PAGE_UP, KeyCodeLookupTable[VK_NEXT] = KEY_PAGE_DOWN,
+    KeyCodeLookupTable[VK_CAPITAL] = KEY_CAPS_LOCK, KeyCodeLookupTable[VK_NUMLOCK] = KEY_NUM_LOCK, KeyCodeLookupTable[VK_SCROLL] = KEY_SCROLL_LOCK,
     KeyCodeLookupTable[VK_APPS] = KEY_MENU,
 
-    KeyCodeLookupTable[VK_SHIFT] = KEY_SHIFT, KeyCodeLookupTable[VK_LSHIFT] = KEY_SHIFT,
-    KeyCodeLookupTable[VK_RSHIFT] = KEY_SHIFT,
+    KeyCodeLookupTable[VK_SHIFT] = KEY_SHIFT, KeyCodeLookupTable[VK_LSHIFT] = KEY_SHIFT, KeyCodeLookupTable[VK_RSHIFT] = KEY_SHIFT,
 
-    KeyCodeLookupTable[VK_CONTROL] = KEY_CONTROL, KeyCodeLookupTable[VK_LCONTROL] = KEY_CONTROL,
-    KeyCodeLookupTable[VK_RCONTROL] = KEY_CONTROL,
+    KeyCodeLookupTable[VK_CONTROL] = KEY_CONTROL, KeyCodeLookupTable[VK_LCONTROL] = KEY_CONTROL, KeyCodeLookupTable[VK_RCONTROL] = KEY_CONTROL,
 
-    KeyCodeLookupTable[VK_MENU] = KEY_ALT, KeyCodeLookupTable[VK_LMENU] = KEY_ALT,
-    KeyCodeLookupTable[VK_RMENU] = KEY_ALT,
+    KeyCodeLookupTable[VK_MENU] = KEY_ALT, KeyCodeLookupTable[VK_LMENU] = KEY_ALT, KeyCodeLookupTable[VK_RMENU] = KEY_ALT,
 
     KeyCodeLookupTable[VK_F1] = KEY_F1;
     KeyCodeLookupTable[VK_F2] = KEY_F2;
