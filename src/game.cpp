@@ -145,7 +145,7 @@ void updatePlayerPosition()
     static Vec2 remainder = {};
     // Move the Player in X until collision or moveX is exausted
     remainder.x += player->speed.x;
-    int moveX = round(remainder.x);
+    int moveX = (int)round(remainder.x);
     if (moveX != 0) {
         remainder.x -= moveX;
         IRect playerRect = player->getRect();
@@ -186,7 +186,7 @@ void updatePlayerPosition()
 
     // Move the Player in Y until collision or moveY is exausted
     remainder.y += player->speed.y;
-    int moveY = round(remainder.y);
+    int moveY = (int)round(remainder.y);
     if (moveY != 0) {
         remainder.y -= moveY;
         IRect playerRect = player->getRect();
@@ -265,7 +265,7 @@ void gameTickRunner(float deltaTime)
 
     // if/while
     while (gameState->internalTimer >= UPDATE_DELAY) {
-        gameState->internalTimer -= UPDATE_DELAY;
+        gameState->internalTimer -= (float)UPDATE_DELAY;
         gameState->tickCounter++;
 
         // FP_LOG("executeGameTime - %d", gameState->tickCounter);

@@ -2,11 +2,48 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Build",
+            "label": "CMake: Configure",
             "type": "shell",
-            "command": "sh build.sh",
+            "command": "cmake",
+            "args": [
+                "-S",
+                ".",
+                "-B",
+                "build"
+            ],
             "group": {
                 "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "CMake: Build",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "build"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "dependsOn": "CMake: Configure",
+            "presentation": {
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Run Game",
+            "type": "shell",
+            "command": "c:/Users/gameg/Projects/MyFirstGame/build/builds/Debug/game.exe",
+            "group": {
+                "kind": "test",
                 "isDefault": true
             },
             "presentation": {

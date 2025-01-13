@@ -104,7 +104,7 @@ bool load_shaders(BumpAllocator* transientStorage)
 
     long long timestampVert = get_timestamp("assets/shaders/quad.vert");
     long long timestampFrag = get_timestamp("assets/shaders/quad.frag");
-    glContext.shaderTimestamp = fmax(timestampVert, timestampFrag);
+    glContext.shaderTimestamp = (int)fmax(timestampVert, timestampFrag);
 
     // Create the OpenGL Program, attach shaders, and link to the context
     glContext.programID = glCreateProgram();
@@ -140,7 +140,7 @@ bool load_textures()
     );
 
     if (!data) {
-        FP_ASSERT(false, "Failed to Load Image")
+        FP_ASSERT(false, "Failed to Load Image");
         return false;
     }
 

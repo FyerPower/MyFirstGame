@@ -23,13 +23,13 @@ class Player
     {
         // Multiplier is 3.0f if we are changing direction
         float mult = (sign > 0 && speed.y < 0 || sign < 0 && speed.y > 0) ? 3.0f : 1.0f;
-        speed.x = Math::approach(speed.x, sign * runSpeed, runAcceleration * mult * UPDATE_DELAY);
+        speed.x = Math::approach(speed.x, sign * runSpeed, runAcceleration * mult * (float)UPDATE_DELAY);
     }
     void setSpeedY(int sign)
     {
         // Multiplier is 3.0f if we are changing direction
         float mult = (sign > 0 && speed.y < 0 || sign < 0 && speed.y > 0) ? 3.0f : 1.0f;
-        speed.y = Math::approach(speed.y, sign * runSpeed, runAcceleration * mult * UPDATE_DELAY);
+        speed.y = Math::approach(speed.y, sign * runSpeed, runAcceleration * mult * (float)UPDATE_DELAY);
     }
 
   private:

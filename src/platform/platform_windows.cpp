@@ -4,6 +4,7 @@
 #include "../input.hpp"
 #include "../libs/libs.hpp"
 
+#undef APIENTRY // windows redefines this
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <windows.h>
@@ -365,7 +366,7 @@ void platform_swap_buffers()
     SwapBuffers(dc);
 };
 
-void* platform_load_dynamic_library(char* dll)
+void* platform_load_dynamic_library(const char* dll)
 {
     HMODULE result = LoadLibraryA(dll);
     FP_ASSERT(result, "Failed to load dll: %s", dll);

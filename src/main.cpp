@@ -56,33 +56,42 @@ static update_game_type* update_game_ptr;
 // Wrapper Function
 void update_game(GameState* gameStateIn, RenderData* renderDataIn, Input* inputIn, float deltaTime)
 {
-    update_game_ptr(gameStateIn, renderDataIn, inputIn, deltaTime);
+    if (update_game_ptr) {
+        update_game_ptr(gameStateIn, renderDataIn, inputIn, deltaTime);
+    } else {
+        FP_ASSERT(false, "update_game_ptr is null");
+    }
 }
 
 void reload_game_dll(BumpAllocator* transientStorage)
 {
     static void* gameDLL;
     static long long lastEditTimestampGameDLL;
+    static const char* gameDLLPath = "build/builds/game_load.dll";
+    static const char* gameDLLLoadedPath = "build/builds/game2.dll";
 
-    long long currentTimestampGameDLL = get_timestamp("builds/game.dll");
+    long long currentTimestampGameDLL = get_timestamp(gameDLLPath);
     if (currentTimestampGameDLL > lastEditTimestampGameDLL) {
         if (gameDLL) {
             bool freeResult = platform_free_dynamic_library(gameDLL);
-            FP_ASSERT(freeResult, "Failed to free game.dll");
+            FP_ASSERT(freeResult, "Failed to free (%s)", gameDLLPath);
             gameDLL = nullptr;
-            FP_LOG("Freed game.dll");
+            FP_LOG("Freed (%s)", gameDLLPath);
         }
 
-        while (!copy_file("builds/game.dll", "builds/game_load.dll", transientStorage)) {
-            Sleep(10);
+        Sleep(10);
+        while (!copy_file(gameDLLPath, gameDLLLoadedPath, transientStorage)) {
+            FP_LOG("Failed to copy DLL Files, Retrying...");
         }
-        FP_LOG("Copied game.dll into game_load.dll");
+        FP_LOG("Copied (%s) into (%s)", gameDLLPath, gameDLLLoadedPath);
 
-        gameDLL = platform_load_dynamic_library("builds/game_load.dll");
-        FP_ASSERT(gameDLL, "Failed to load game.dll");
+        gameDLL = platform_load_dynamic_library(gameDLLLoadedPath);
+        FP_ASSERT(gameDLL, "Failed to load (%s)", gameDLLLoadedPath);
 
         update_game_ptr = (update_game_type*)platform_load_dynamic_function(gameDLL, "update_game");
         FP_ASSERT(update_game_ptr, "Failed to load update_game function");
+
+        FP_LOG("Successfully loaded (%s)", gameDLLLoadedPath);
         lastEditTimestampGameDLL = currentTimestampGameDLL;
     }
 }
@@ -137,7 +146,7 @@ int main()
     FP_LOG("======= Game Loop Begin =======");
     while (isRunning) {
         // Get Delta Time
-        float deltaTime = get_delta_time();
+        float deltaTime = (float)get_delta_time();
 
         // Check to see if the Game.DLL needs updating and update accordingly
         reload_game_dll(&transientStorage);

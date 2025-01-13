@@ -27,11 +27,4 @@
 *.lib
 
 # Executables
-*.exe
-*.out
-*.app
-
-# Debug
-*.ilk
-*.pdb
-*.exp
+build/*
