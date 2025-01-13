@@ -5,6 +5,7 @@
 // ###############################################
 
 #define b8 char;
+#define ArraySize(x) (sizeof((x)) / sizeof((x)[0]))
 
 #define BIT(x) 1 << (x)
 #define KB(x) ((unsigned long long)1024 * x)
@@ -19,14 +20,35 @@ struct IVec2 {
     int x;
     int y;
 
+    IVec2 operator+(IVec2 other)
+    {
+        return {x + other.x, y + other.y};
+    }
+    IVec2& operator+=(int value)
+    {
+        x += value;
+        y += value;
+        return *this;
+    }
+
     IVec2 operator-(IVec2 other)
     {
         return {x - other.x, y - other.y};
+    }
+    IVec2& operator-=(int value)
+    {
+        x -= value;
+        y -= value;
+        return *this;
     }
 
     IVec2 operator/(float scalar)
     {
         return {(int)(x / scalar), (int)(y / scalar)};
+    }
+    IVec2 operator/(int scalar)
+    {
+        return {x / scalar, y / scalar};
     }
 };
 
@@ -110,6 +132,11 @@ struct Rect {
 struct IRect {
     IVec2 pos;
     IVec2 size;
+
+    IRect operator+(IVec2 startingPos)
+    {
+        return {pos + startingPos, size};
+    }
 };
 
 // ###############################################

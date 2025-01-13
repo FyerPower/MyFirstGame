@@ -65,6 +65,7 @@ static GameState* gameState;
 // #tag Functions (Exposed)
 // ###############################################
 
+// TODO: Why is this "C" and not "C++"?
 extern "C" {
 EXPORT_FN void update_game(GameState* gameStateIn, RenderData* renderDataIn, Input* inputIn, float deltaTime);
 }

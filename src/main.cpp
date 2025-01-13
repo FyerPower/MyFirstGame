@@ -131,7 +131,7 @@ int main()
 
     // Create the Window
     input->screenSize.x = 1280;
-    input->screenSize.y = 720;
+    input->screenSize.y = 852;
     platform_create_window(input->screenSize.x, input->screenSize.y, "My Game");
     FP_LOG("Window Created");
 
