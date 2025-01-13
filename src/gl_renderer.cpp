@@ -56,7 +56,7 @@ static void APIENTRY gl_debug_callback(GLenum source, GLenum type, GLuint id, GL
     }
 }
 
-GLuint gl_create_shaders(GLenum shaderType, char* shaderPath, BumpAllocator* transientStorage)
+GLuint gl_create_shaders(GLenum shaderType, const char* shaderPath, BumpAllocator* transientStorage)
 {
     int fileSize = 0;
     GLuint shaderId = glCreateShader(shaderType);
