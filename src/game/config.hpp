@@ -6,12 +6,11 @@
 // #tag Constants
 // ###############################################
 
-constexpr int WORLD_WIDTH = 320;
-constexpr int WORLD_HEIGHT = 160;
-constexpr int TILESIZE = 16;
-
 // The size of the world in tiles
-constexpr IVec2 WORLD_GRID = {WORLD_WIDTH / TILESIZE, WORLD_HEIGHT / TILESIZE};
+constexpr int TILESIZE = 16;
+constexpr IVec2 WORLD_GRID = {30, 20};
+constexpr int WORLD_WIDTH = WORLD_GRID.x * TILESIZE;
+constexpr int WORLD_HEIGHT = WORLD_GRID.y * TILESIZE;
 
 // The size of the screen in tiles
 

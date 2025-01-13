@@ -1,0 +1,43 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "WorldMap.tmj",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "fileStates": {
+        "TileSet.tsj": {
+            "scaleInDock": 5.5,
+            "scaleInEditor": 5.5
+        },
+        "WorldMap.tmj": {
+            "scale": 5.5,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 165.09090909090907,
+                "y": 145.1818181818182
+            }
+        }
+    },
+    "last.imagePath": "C:/Users/gameg/Projects/MyFirstGame/assets/textures",
+    "map.lastUsedFormat": "json",
+    "map.renderOrder": "2",
+    "map.tileHeight": 16,
+    "map.tileWidth": 16,
+    "openFiles": [
+        "TileSet.tsj",
+        "WorldMap.tmj"
+    ],
+    "project": "WorldMap.tiled-project",
+    "recentFiles": [
+        "TileSet.tsj",
+        "WorldMap.tmj"
+    ],
+    "tileset.lastUsedFormat": "json",
+    "tileset.tileSize": {
+        "height": 16,
+        "width": 16
+    }
+}

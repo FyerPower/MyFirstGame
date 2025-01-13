@@ -4,6 +4,7 @@
 #include "../input.hpp"
 #include "../libs/libs.hpp"
 
+#undef APIENTRY // windows redefines this
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <windows.h>
@@ -111,7 +112,7 @@ LRESULT CALLBACK windows_callback(HWND window, UINT msg, WPARAM wParam, LPARAM l
 /**
  * Create Window
  */
-bool platform_create_window(int width, int height, char* title)
+bool platform_create_window(int width, int height, const char* title)
 {
     HINSTANCE instance = GetModuleHandleA(0);
     WNDCLASSA wc = {};
@@ -341,7 +342,7 @@ void platform_update_window()
 /**
  * Load OpenGL
  */
-void* platform_load_gl_function(char* funcName)
+void* platform_load_gl_function(const char* funcName)
 {
     // Attempt to load OpenGL
     PROC proc = wglGetProcAddress(funcName);
@@ -365,14 +366,14 @@ void platform_swap_buffers()
     SwapBuffers(dc);
 };
 
-void* platform_load_dynamic_library(char* dll)
+void* platform_load_dynamic_library(const char* dll)
 {
     HMODULE result = LoadLibraryA(dll);
     FP_ASSERT(result, "Failed to load dll: %s", dll);
     return result;
 }
 
-void* platform_load_dynamic_function(void* dll, char* funName)
+void* platform_load_dynamic_function(void* dll, const char* funName)
 {
     FARPROC proc = GetProcAddress((HMODULE)dll, funName);
     FP_ASSERT(proc, "Failed to load function: %s from DLL", funName);

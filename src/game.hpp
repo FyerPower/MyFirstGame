@@ -65,6 +65,6 @@ static GameState* gameState;
 // #tag Functions (Exposed)
 // ###############################################
 
-extern "C" {
+extern "C++" {
 EXPORT_FN void update_game(GameState* gameStateIn, RenderData* renderDataIn, Input* inputIn, float deltaTime);
 }

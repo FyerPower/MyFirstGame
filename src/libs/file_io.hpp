@@ -28,9 +28,9 @@ long get_file_size(const char* filePath)
 {
     struct stat file_stat = {}; // Construct the file_stat variable
     stat(filePath, &file_stat); // Get the stats of a file and store it into `file_stat`
-    return file_stat.st_size; // Return the size of the file.  Caveat: This only works for regular files, not symlinks /
-                              // shared memory objects / or typed memory objects. If those are needed, you will need to
-                              // open the file, fseek to the end, ftell to get the size, fseek back to start, and close.
+    return file_stat.st_size;   // Return the size of the file.  Caveat: This only works for regular files, not symlinks /
+                                // shared memory objects / or typed memory objects. If those are needed, you will need to
+                                // open the file, fseek to the end, ftell to get the size, fseek back to start, and close.
 };
 
 bool file_exists(const char* filePath)
@@ -38,10 +38,9 @@ bool file_exists(const char* filePath)
     FP_ASSERT(filePath, "No filePath supplied!");
 
     // Attempt to open the file (read binary)
-    auto file = fopen(filePath, "rb");
-
-    // If no file was found, return false that the file does not exist.
-    if (!file) {
+    FILE* file;
+    if (fopen_s(&file, filePath, "rb") != 0) {
+        // If no file was found, return false that the file does not exist.
         return false;
     }
 
@@ -61,10 +60,9 @@ char* read_file(const char* filePath, int* fileSize, char* buffer)
     *fileSize = 0;
 
     // Attempt to open the file (read binary)
-    auto file = fopen(filePath, "rb");
-
-    // If no file was found, log an error and return a nullptr
-    if (!file) {
+    FILE* file;
+    if (fopen_s(&file, filePath, "rb") != 0) {
+        // If no file was found, log an error and return a nullptr
         FP_ERROR("Failed opening file: %s", filePath);
         return nullptr;
     }
@@ -106,11 +104,10 @@ void write_file(const char* filePath, char* buffer, int fileSize)
     FP_ASSERT(buffer, "No buffer specified.");
     FP_ASSERT(fileSize, "No fileSize specified.");
 
-    // Attempt to open the file (read binary)
-    auto file = fopen(filePath, "rb");
-
-    // If no file was found, log an error and return
-    if (!file) {
+    // Attempt to open the file (write binary)
+    FILE* file;
+    if (fopen_s(&file, filePath, "wb") != 0) {
+        // If no file was found, log an error and return
         FP_ERROR("Failed opening file: %s", filePath);
         return;
     }
@@ -134,16 +131,17 @@ bool copy_file(const char* filePath, const char* outputPath, char* buffer)
     char* data = read_file(filePath, &fileSize, buffer);
 
     // open the destination file (creates if it doesn't exist)
-    auto outputFile = fopen(outputPath, "wb");
-    if (!outputFile) {
+    FILE* outputFile;
+    if (fopen_s(&outputFile, outputPath, "wb") != 0) {
         FP_ERROR("Failed opening File: %s", outputPath);
         return false;
     }
 
     // write the contents of the original file into the outputFile
-    int result = fwrite(data, sizeof(char), fileSize, outputFile);
+    auto result = fwrite(data, sizeof(char), fileSize, outputFile);
     if (!result) {
         FP_ERROR("Failed opening File: %s", outputPath);
+        fclose(outputFile);
         return false;
     }
 

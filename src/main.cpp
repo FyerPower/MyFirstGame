@@ -137,7 +137,7 @@ int main()
     FP_LOG("======= Game Loop Begin =======");
     while (isRunning) {
         // Get Delta Time
-        float deltaTime = get_delta_time();
+        float deltaTime = (float)get_delta_time();
 
         // Check to see if the Game.DLL needs updating and update accordingly
         reload_game_dll(&transientStorage);

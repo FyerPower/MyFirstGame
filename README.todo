@@ -2,6 +2,7 @@
   ✘ Not Doing
   ✔ Add Keybinds to Move Sprite
   ☐ Add Collision
+  ☐ Make textures semi transparent if player is behind them
 
 *Misc*:
   ☐ Add Player Struct

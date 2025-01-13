@@ -2,12 +2,24 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch",
+            "name": "OG Launch",
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${workspaceFolder}/builds/game.exe",
             "args": [],
             "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Debug Game",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/builds/Debug/game.exe",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "logging": {
+                "engineLogging": true
+            },
             "console": "integratedTerminal"
         }
     ]

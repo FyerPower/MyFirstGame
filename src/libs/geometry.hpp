@@ -10,6 +10,12 @@
 class Geometry
 {
   public:
+    // The orthographic projection matrix is typically defined by the left, right, bottom, top, near, and far
+    // clipping planes. The matrix can be represented as follows:
+    // | 2/(right-left)       0                0              -(right+left)/(right-left) |
+    // | 0                   2/(top-bottom)    0              -(top+bottom)/(top-bottom) |
+    // | 0                   0               -2/(far-near)    -(far+near)/(far-near)     |
+    // | 0                   0                0               1                          |
     static Mat4 orthographic_projection(float left, float right, float top, float bottom)
     {
         Mat4 result = {};
