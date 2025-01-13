@@ -2,14 +2,17 @@
 // #tag Includes
 // ###############################################
 
+#include "tileson.hpp"
+
 #include "libs/libs.hpp"
 #include "game.hpp"
-#include "assets.hpp"
 #include "render_interface.hpp"
 
 // ###############################################
 // #tag Constants
 // ###############################################
+
+const bool drawHitboxes = true;
 
 // ###############################################
 // #tag Structs
@@ -79,6 +82,15 @@ void initializeKeybinds()
     renderData->gameCamera.position.y = -80;
 }
 
+Sprite* get_sprite(SpriteID spriteID)
+{
+    Sprite* sprite = gameState->spriteArray[spriteID];
+    if (!sprite) {
+        Logger::asssert(false, "Sprite not found: %d", spriteID);
+    }
+    return sprite;
+}
+
 // ###############################################
 // #tag Functions Tick Logic
 // ###############################################
@@ -90,27 +102,27 @@ void handleInputActions(float deltaTime)
     if (is_down(MOUSE_LEFT)) {
         IVec2 worldPos = screen_to_world(input->mousePos);
         IVec2 mousePosWorld = input->mousePosWorld;
-        Tile* tile = world->get_tile(worldPos);
-        if (tile) {
-            tile->isVisible = true;
-        }
+        // Tile* tile = world->get_tile(worldPos);
+        // if (tile) {
+        //     tile->isVisible = true;
+        // }
     }
     if (is_down(MOUSE_RIGHT)) {
         IVec2 worldPos = screen_to_world(input->mousePos);
         IVec2 mousePosWorld = input->mousePosWorld;
-        Tile* tile = world->get_tile(worldPos);
-        if (tile) {
-            tile->isVisible = false;
-        }
+        // Tile* tile = world->get_tile(worldPos);
+        // if (tile) {
+        //     tile->isVisible = false;
+        // }
     }
     if (just_pressed(MOUSE_SCROLL_DOWN)) {
-        FP_LOG("Key Pressed: MOUSE_SCROLL_DOWN");
+        Logger::log("Key Pressed: MOUSE_SCROLL_DOWN");
         if (is_control_pressed()) {
             renderData->gameCamera.zoomOut();
         }
     }
     if (just_pressed(MOUSE_SCROLL_UP)) {
-        FP_LOG("Key Pressed: MOUSE_SCROLL_UP");
+        Logger::log("Key Pressed: MOUSE_SCROLL_UP");
         if (is_control_pressed()) {
             renderData->gameCamera.zoomIn();
         }
@@ -145,31 +157,32 @@ void updatePlayerPosition()
     static Vec2 remainder = {};
     // Move the Player in X until collision or moveX is exausted
     remainder.x += player->speed.x;
-    int moveX = round(remainder.x);
+    int moveX = lround(remainder.x);
     if (moveX != 0) {
         remainder.x -= moveX;
-        IRect playerRect = player->getRect();
+        IRect playerHitbox = player->getHitbox();
         int signMove = Math::sign(moveX); // -1 or 1
 
         auto movePlayerX = [&] {
             while (moveX) {
-                playerRect.pos.x += signMove;
+                playerHitbox.pos.x += signMove;
 
                 // exit out of the while loop if we hit a wall or solid tile
                 IVec2 playerGridPos = world->get_grid_pos(player->position);
                 for (int x = playerGridPos.x - 1; x <= playerGridPos.x + 1; x++) {
                     for (int y = playerGridPos.y - 1; y <= playerGridPos.y + 1; y++) {
                         Tile* tile = world->get_tile(x, y);
-                        if (!tile || !tile->isVisible) {
+                        if (!tile) {
                             continue;
                         }
-                        FP_LOG("=== Collision Check ===");
-                        FP_LOG("Tile: %d %d", x, y);
-                        FP_LOG("Player Rect: %d %d %d %d", playerRect.pos.x, playerRect.pos.y, playerRect.size.x, playerRect.size.y);
-                        FP_LOG("Tile Rect: %d %d %d %d", tile->getRect().pos.x, tile->getRect().pos.y, tile->getRect().size.x, tile->getRect().size.y);
-                        FP_LOG("Tile Pos: %d %d", tile->position.x, tile->position.y);
-                        if (Geometry::isColliding(playerRect, tile->getRect())) {
-                            FP_LOG("Collision Detected");
+                        Logger::log("=== Collision Check ===");
+                        Logger::log("Tile: %d %d", x, y);
+                        Logger::log("Player Rect: %d %d %d %d", playerHitbox.pos.x, playerHitbox.pos.y, playerHitbox.size.x, playerHitbox.size.y);
+                        Logger::log("Tile Rect: %d %d %d %d", tile->getHitbox().pos.x, tile->getHitbox().pos.y, tile->getHitbox().size.x,
+                                    tile->getHitbox().size.y);
+                        Logger::log("Tile Pos: %d %d", tile->position.x, tile->position.y);
+                        if (Geometry::isColliding(playerHitbox, tile->getHitbox())) {
+                            Logger::log("Collision Detected");
                             player->speed.x = 0;
                             return;
                         }
@@ -186,27 +199,27 @@ void updatePlayerPosition()
 
     // Move the Player in Y until collision or moveY is exausted
     remainder.y += player->speed.y;
-    int moveY = round(remainder.y);
+    int moveY = lround(remainder.y);
     if (moveY != 0) {
         remainder.y -= moveY;
-        IRect playerRect = player->getRect();
+        IRect playerHitbox = player->getHitbox();
         int signMove = Math::sign(moveY);
         auto movePlayerY = [&] {
             while (moveY) {
-                playerRect.pos.y += signMove;
+                playerHitbox.pos.y += signMove;
                 // Loop through local Tiles
                 IVec2 playerGridPos = world->get_grid_pos(player->position);
                 for (int x = playerGridPos.x - 1; x <= playerGridPos.x + 1; x++) {
                     Tile* tile = world->get_tile(x, playerGridPos.y + 1);
-                    if (!tile || !tile->isVisible) {
+                    if (!tile) {
                         continue;
                     }
-                    if (Geometry::isColliding(playerRect, tile->getRect())) {
+                    if (Geometry::isColliding(playerHitbox, tile->getHitbox())) {
                         player->speed.y = 0;
                         return;
                     }
                 }
-                // Move the Player
+                // Move the Playeraa
                 player->position.y += signMove;
                 moveY -= signMove;
             }
@@ -218,26 +231,62 @@ void updatePlayerPosition()
     renderData->gameCamera.position = {(float)player->position.x, -(float)player->position.y};
 }
 
-void initializeGame()
+void loadWorld(const char* worldPath)
 {
-    initializeKeybinds();
+    Logger::log("Loading Map..");
+    World* world = gameState->world;
+    tson::Tileson t;
+    std::unique_ptr<tson::Map> map = t.parse(fs::path(worldPath));
 
-    // Store the location on the Spritesheet where the ground texture is located.
-    {
-        IVec2 tilesPosition = {240, 0};
-        for (int y = 0; y < 5; y++) {
-            for (int x = 0; x < 4; x++) {
-                gameState->tileCoords.add({tilesPosition.x + x * TILESIZE, tilesPosition.y + y * TILESIZE});
+    if (map->getStatus() == tson::ParseStatus::OK) {
+        for (auto& layer : map->getLayers()) {
+            // For tile layers, you can get the tiles presented as a 2D map by calling getTileData()
+            // Using x and y positions in tile units.
+            if (layer.getType() == tson::LayerType::TileLayer) {
+                // When the map is of a fixed size, you can get the tiles like this
+                if (!map->isInfinite()) {
+                    auto tileData = layer.getTileData();
+                    for (auto& [id, tile] : tileData) {
+                        int tileID = tile->getId();
+                        if (tileID == 0) {
+                            continue;
+                        }
+                        world->setTile(std::get<0>(id), std::get<1>(id), get_sprite((SpriteID)(tileID - 1)));
+                    }
+                }
             }
         }
-        // Black inside
-        gameState->tileCoords.add({tilesPosition.x, tilesPosition.y + 5 * TILESIZE});
-    }
 
-    renderData->gameCamera.dimensions = {WORLD_WIDTH, WORLD_HEIGHT};
+        Logger::log("Map (%s) loaded successfully", worldPath);
+    } else {
+        Logger::asssert(false, "Map (%s) loading failed", worldPath);
+    }
+}
+
+void intializeWorld()
+{
+    // Read the world data from the WorldMap.tsx file.
+    loadWorld("assets/worlds/WorldMap.tmj");
+}
+
+void initializeGame()
+{
+    // Call out to the sprite file and initialize the sprites
+    gameState->spriteArray = initializeSprites();
+
+    // Initialize our Keybinds
+    initializeKeybinds();
+
+    // Initialize our World
+    intializeWorld();
+
+    // Initialize the camera to 0,0
     renderData->gameCamera.position = {0, 0};
+    renderData->gameCamera.dimensions = {WORLD_WIDTH, WORLD_HEIGHT};
+
+    // Mark Initialized
     gameState->initialized = true;
-    FP_LOG("Game Initialized");
+    Logger::log("Game Initialized");
 }
 
 void executeGameTime(float deltaTime)
@@ -265,10 +314,10 @@ void gameTickRunner(float deltaTime)
 
     // if/while
     while (gameState->internalTimer >= UPDATE_DELAY) {
-        gameState->internalTimer -= UPDATE_DELAY;
+        gameState->internalTimer -= (float)UPDATE_DELAY;
         gameState->tickCounter++;
 
-        // FP_LOG("executeGameTime - %d", gameState->tickCounter);
+        // Logger::log("executeGameTime - %d", gameState->tickCounter);
         executeGameTime(deltaTime);
     }
 }
@@ -279,104 +328,30 @@ void gameTickRunner(float deltaTime)
 
 void drawWorld()
 {
-    for (int y = 0; y < WORLD_GRID.y; y++) {
-        for (int x = 0; x < WORLD_GRID.x; x++) {
-            // Draw Background
-            Transform bgTransformation = {};
-            bgTransformation.pos = {x * (float)TILESIZE, y * (float)TILESIZE};
-            bgTransformation.size = {16, 16};
-            bgTransformation.spriteSize = {16, 16};
-            // int randomTextureOffset[6] = {0, 0, 0, 16, 32, 48};
-            // bgTransformation.atlasOffset = {192, randomTextureOffset[Math::random(0, 5)]};
-            bgTransformation.atlasOffset = {192, 0};
-            draw_quad(bgTransformation);
-        }
-    }
-}
-
-void drawCustomizableTileset()
-{
     World* world = gameState->world;
-
-    // Neighbouring Tiles
-    int neighbourOffsets[24] = {
-        0,  -1, // Top
-        -1, 0,  // Left
-        1,  0,  // Right
-        0,  1,  // Bottom
-        -1, -1, // Top-Left
-        1,  -1, // Top-Right
-        -1, 1,  // Bottom-Left
-        1,  1,  // Bottom-Right
-        0,  -2, // Top2
-        -2, 0,  // Left2
-        2,  0,  // Right2
-        0,  2   // Bottom2
-    };
-
-    // Topleft     = BIT(4) = 16
-    // Toplright   = BIT(5) = 32
-    // Bottomleft  = BIT(6) = 64
-    // Bottomright = BIT(7) = 128
     for (int y = 0; y < WORLD_GRID.y; y++) {
         for (int x = 0; x < WORLD_GRID.x; x++) {
             Tile* tile = world->get_tile(x, y);
-            if (!tile->isVisible) {
-                continue;
-            }
-            tile->neighbourMask = 0;
-            int neighbourCount = 0;
-            int extendedNeighbourCount = 0;
-            int emptyNeighbourSlot = 0;
-            // Look at the sorrounding 12 Neighbours
-            for (int n = 0; n < 12; n++) {
-                Tile* neighbour = world->get_tile(x + neighbourOffsets[n * 2], y + neighbourOffsets[n * 2 + 1]);
-                // No neighbour means the edge of the world
-                if (!neighbour || neighbour->isVisible) {
-                    tile->neighbourMask |= BIT(n);
-                    if (n < 8) // Counting direct neighbours
-                    {
-                        neighbourCount++;
-                    } else // Counting neighbours 1 Tile away
-                    {
-                        extendedNeighbourCount++;
-                    }
-                } else if (n < 8) {
-                    emptyNeighbourSlot = n;
-                }
-            }
-            if (neighbourCount == 7 && emptyNeighbourSlot >= 4) // We have a corner
-            {
-                tile->neighbourMask = 16 + (emptyNeighbourSlot - 4);
-            } else if (neighbourCount == 8 && extendedNeighbourCount == 4) {
-                tile->neighbourMask = 20;
-            } else {
-                tile->neighbourMask = tile->neighbourMask & 0b1111;
-            }
+            draw_tile(tile);
 
-            // Draw Tile
-            Transform transform = {};
-            // Draw the Tile around the center
-            transform.pos = {x * (float)TILESIZE, y * (float)TILESIZE};
-            transform.size = {16, 16};
-            transform.spriteSize = {16, 16};
-            transform.atlasOffset = gameState->tileCoords[tile->neighbourMask];
-            draw_quad(transform);
+            // if (drawHitboxes) {
+            //     draw_rect(tile->getHitbox(), Colors::Red);
+            // }
         }
     }
 }
 
 void drawTownFolk()
 {
-    draw_sprite(SPRITE_PLAYER, Vec2{32.0f, 32.0f});
-    draw_sprite(SPRITE_PLAYER, Vec2{64.0f, 32.0f});
-    draw_sprite(SPRITE_PLAYER, Vec2{32.0f, 64.0f});
-    draw_sprite(SPRITE_PLAYER, Vec2{64.0f, 64.0f});
+    draw_sprite(get_sprite(SPRITE_PLAYER_BACK), Vec2{32.0f, 32.0f});
+    draw_sprite(get_sprite(SPRITE_PLAYER_RIGHT), Vec2{64.0f, 32.0f});
+    draw_sprite(get_sprite(SPRITE_PLAYER), Vec2{32.0f, 64.0f});
+    draw_sprite(get_sprite(SPRITE_PLAYER), Vec2{64.0f, 64.0f});
 }
 
 void drawPlayer()
 {
-    draw_sprite(SPRITE_PLAYER, gameState->player->position);
+    draw_sprite(get_sprite(SPRITE_PLAYER), gameState->player->position);
 }
 
 // ###############################################
@@ -397,7 +372,6 @@ EXPORT_FN void update_game(GameState* gameStateIn, RenderData* renderDataIn, Inp
     float interpolatedDT = (float)(gameState->internalTimer / UPDATE_DELAY);
 
     drawWorld();
-    drawCustomizableTileset();
-    drawTownFolk();
-    drawPlayer();
+    // drawTownFolk();
+    // drawPlayer();
 }

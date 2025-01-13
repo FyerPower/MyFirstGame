@@ -63,26 +63,32 @@ void reload_game_dll(BumpAllocator* transientStorage)
 {
     static void* gameDLL;
     static long long lastEditTimestampGameDLL;
+    static const char* gameDLLPath = "build/builds/game_load.dll";
+    static const char* gameDLLLoadedPath = "build/builds/game2.dll";
 
-    long long currentTimestampGameDLL = get_timestamp("builds/game.dll");
+    long long currentTimestampGameDLL = get_timestamp(gameDLLPath);
     if (currentTimestampGameDLL > lastEditTimestampGameDLL) {
         if (gameDLL) {
             bool freeResult = platform_free_dynamic_library(gameDLL);
-            FP_ASSERT(freeResult, "Failed to free game.dll");
+            Logger::asssert(freeResult, "Failed to free game.dll");
             gameDLL = nullptr;
-            FP_LOG("Freed game.dll");
+            Logger::log("Freed (%s)", gameDLLLoadedPath);
         }
 
-        while (!copy_file("builds/game.dll", "builds/game_load.dll", transientStorage)) {
+        Sleep(10);
+        while (!copy_file(gameDLLPath, gameDLLLoadedPath, transientStorage)) {
+            Logger::log("Failed to copy DLL Files, Retrying...");
             Sleep(10);
         }
-        FP_LOG("Copied game.dll into game_load.dll");
+        Logger::log("Copied (%s) into (%s)", gameDLLPath, gameDLLLoadedPath);
 
-        gameDLL = platform_load_dynamic_library("builds/game_load.dll");
-        FP_ASSERT(gameDLL, "Failed to load game.dll");
+        gameDLL = platform_load_dynamic_library(gameDLLLoadedPath);
+        Logger::asssert(gameDLL, "Failed to load (%s)", gameDLLLoadedPath);
 
         update_game_ptr = (update_game_type*)platform_load_dynamic_function(gameDLL, "update_game");
-        FP_ASSERT(update_game_ptr, "Failed to load update_game function");
+        Logger::asssert(update_game_ptr, "Failed to load update_game function");
+
+        Logger::log("Successfully loaded (%s)", gameDLLLoadedPath);
         lastEditTimestampGameDLL = currentTimestampGameDLL;
     }
 }
@@ -100,7 +106,7 @@ int main()
     // Allocate the GameState into Memory
     void* gameState_ptr = bump_alloc(&persistentStorage, sizeof(GameState));
     if (!gameState_ptr) {
-        FP_ERROR("Failed to allow GameState");
+        Logger::error("Failed to allow GameState");
         return -1;
     }
     gameState = new (gameState_ptr) GameState();
@@ -108,7 +114,7 @@ int main()
     // Allocate the RenderData into Memory
     void* renderData_ptr = bump_alloc(&persistentStorage, sizeof(RenderData));
     if (!renderData_ptr) {
-        FP_ERROR("Failed to allow RenderData");
+        Logger::error("Failed to allow RenderData");
         return -1;
     }
     renderData = new (renderData_ptr) RenderData();
@@ -116,7 +122,7 @@ int main()
     // Allocate the Input into Memory
     input = (Input*)bump_alloc(&persistentStorage, sizeof(Input));
     if (!input) {
-        FP_ERROR("Failed to allow Input");
+        Logger::error("Failed to allow Input");
         return -1;
     }
 
@@ -124,20 +130,20 @@ int main()
     input->screenSize.x = 1280;
     input->screenSize.y = 720;
     platform_create_window(input->screenSize.x, input->screenSize.y, "My Game");
-    FP_LOG("Window Created");
+    Logger::log("Window Created");
 
     // Assign keys per platform
     platform_fill_keycode_lookup_table();
 
     // Initialize OpenGL
     gl_init(&transientStorage);
-    FP_LOG("Initialized OpenGL");
+    Logger::log("Initialized OpenGL");
 
     // Main Game Loop
-    FP_LOG("======= Game Loop Begin =======");
+    Logger::log("======= Game Loop Begin =======");
     while (isRunning) {
         // Get Delta Time
-        float deltaTime = get_delta_time();
+        float deltaTime = (float)get_delta_time();
 
         // Check to see if the Game.DLL needs updating and update accordingly
         reload_game_dll(&transientStorage);
@@ -157,9 +163,9 @@ int main()
         // Reset Storage (as its transient)
         transientStorage.used = 0;
     }
-    FP_LOG("======= Game Loop End =======");
+    Logger::log("======= Game Loop End =======");
 
     // Return 0 when game loop is done (exitting appliation)
-    FP_LOG("Shutdown complete");
+    Logger::log("Shutdown complete");
     return 0;
 }

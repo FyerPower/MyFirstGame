@@ -4,8 +4,11 @@
 // #tag Imcludes
 // ###############################################
 
+#include "libs/libs.hpp"
+#include "shaders/shared_header.hpp"
 #include "game/camera.hpp"
-#include "assets.hpp"
+#include "game/sprite.hpp"
+#include "game/world.hpp"
 
 // #############################################################################
 // #tag Constants
@@ -15,14 +18,6 @@
 // #tag Structs
 // #############################################################################
 
-// Transformation Object that holds information about what is being rendered
-struct Transform {
-    Vec2 pos;          // The position in the world
-    Vec2 size;         // The size the sprite should be rendered as
-    IVec2 atlasOffset; // The offset (in pixels) in the texture file this a sprite is located
-    IVec2 spriteSize;  // The size (in pixels) this sprite is
-};
-
 // A store for all of our Rendered Objects
 class RenderData
 {
@@ -31,6 +26,7 @@ class RenderData
     OrthographicCamera2D uiCamera;
 
     Array<Transform, 1000> transforms; // Transformation Store
+    // Array<Material, 1000> materials;   // Transformation Store
 };
 
 // #############################################################################
@@ -71,42 +67,58 @@ IVec2 screen_to_world(IVec2 screenPos)
 // #tag Functions
 // #############################################################################
 
-void draw_sprite(SpriteID spriteID, Vec2 pos)
+void draw_tile(Tile* tile)
 {
-    // Get the Sprite
-    Sprite sprite = get_sprite(spriteID);
-
     // Build the Transform
     Transform transform = {};
 
     // Position to the center of the sprite
-    transform.pos = pos - vec_2(sprite.spriteSize) / 2.0f;
+    transform.pos = vec_2(tile->getPos()) - vec_2(tile->sprite->size) / 2.0f;
+    transform.size = vec_2(tile->sprite->size);
+    transform.spriteOffset = tile->sprite->offset;
+    transform.spriteSize = tile->sprite->size;
 
-    //
-    transform.size = vec_2(sprite.spriteSize);
-    transform.atlasOffset = sprite.atlasOffset;
-    transform.spriteSize = sprite.spriteSize;
-
-    //
+    // Add the Transform to the RenderData
     renderData->transforms.add(transform);
-};
+}
 
-void draw_sprite(SpriteID spriteID, IVec2 pos)
-{
-    draw_sprite(spriteID, vec_2(pos));
-};
+// void draw_sprite(Sprite* sprite, Vec2 pos)
+// {
+//     // Add the transform to the RenderData
+//     renderData->transforms.add({
+//         // Position and Size
+//         .pos = pos - vec_2(sprite->size) / 2.0f,
+//         .size = vec_2(sprite->size),
 
-void draw_quad(Transform transform)
-{
-    renderData->transforms.add(transform);
-};
+//         // Define the type of transform
+//         .type = TRANSFORM_TYPE_SPRITE,
+//         .spriteOffset = sprite->offset,
+//         .spriteSize = sprite->size,
+//     });
+// };
 
-void draw_quad(Vec2 pos, Vec2 size)
+void draw_sprite(Sprite* sprite, Vec2 pos)
 {
+    // Build the Transform
     Transform transform = {};
-    transform.pos = pos - size / 2.0f;
-    transform.size = size;
-    transform.atlasOffset = {0, 0};
-    transform.spriteSize = {1, 1}; // Indexing into white
+    transform.pos = pos - vec_2(sprite->size) / 2.0f;
+    transform.size = vec_2(sprite->size);
+    transform.spriteOffset = sprite->offset;
+    transform.spriteSize = sprite->size;
+
+    //
     renderData->transforms.add(transform);
+};
+
+void draw_sprite(Sprite* sprite, IVec2 pos)
+{
+    draw_sprite(sprite, vec_2(pos));
+};
+
+void draw_rect(IRect rect, const Color& color) {
+    // Transform transform = {};
+    // transform.pos = vec_2(rect.pos);
+    // transform.size = vec_2(rect.size);
+    // transform.renderOptions = RENDERING_OPTION_OUTLINE;
+    // renderData->transforms.add(transform);
 };
