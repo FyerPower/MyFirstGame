@@ -20,7 +20,7 @@
 // #tag Constants
 // ###############################################
 
-const char* TEXTURE_PATH = "assets/textures/atlas.png";
+const char* TEXTURE_PATH = "assets/textures/TileSet.png";
 
 // ###############################################
 // #tag Structs

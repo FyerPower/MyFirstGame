@@ -4,6 +4,7 @@
 // #tag Includes
 // ###############################################
 
+#include <array>
 #include "libs/libs.hpp"
 #include "input.hpp"
 #include "render_interface.hpp"
@@ -11,6 +12,7 @@
 #include "game/config.hpp"
 #include "game/player.hpp"
 #include "game/world.hpp"
+#include "game/sprite.hpp"
 
 // ###############################################
 // #tag Structs
@@ -43,6 +45,7 @@ struct GameState {
     World* world;
 
     //
+    std::array<Sprite*, SPRITE_COUNT> spriteArray;
     Array<IVec2, 21> tileCoords;
 
     // Key Mapping

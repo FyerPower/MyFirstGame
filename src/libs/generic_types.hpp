@@ -24,6 +24,7 @@ struct IVec2 {
     {
         return {x + other.x, y + other.y};
     }
+
     IVec2& operator+=(int value)
     {
         x += value;
@@ -35,6 +36,7 @@ struct IVec2 {
     {
         return {x - other.x, y - other.y};
     }
+
     IVec2& operator-=(int value)
     {
         x -= value;
@@ -46,6 +48,7 @@ struct IVec2 {
     {
         return {(int)(x / scalar), (int)(y / scalar)};
     }
+
     IVec2 operator/(int scalar)
     {
         return {x / scalar, y / scalar};
@@ -65,6 +68,7 @@ struct Vec2 {
     {
         return {x / other.x, y / other.y};
     }
+
     Vec2 operator-(Vec2 other)
     {
         return {x - other.x, y - other.y};

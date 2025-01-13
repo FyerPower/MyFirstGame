@@ -1,52 +1,56 @@
 #pragma once
 
-#include "config.hpp"
 #include "../libs/libs.hpp"
+#include "config.hpp"
+#include "sprite.hpp"
 
 class Tile
 {
   public:
+    Sprite* sprite;
     IVec2 position;
-    bool isSolid = false;
-    bool isVisible = false;
-    int neighbourMask = 0;
 
     Tile()
     {}
     Tile(int x, int y)
     {
+        FP_ASSERT(false, "Tile Created without Parameters");
+    }
+    Tile(int x, int y, Sprite* sprite = nullptr)
+    {
         this->position = {x, y};
+        this->sprite = sprite;
     }
 
-    IVec2 getPos()
+    IVec2 getWorldPos()
     {
         return {this->position.x * TILESIZE, this->position.y * TILESIZE};
     }
 
-    IRect getRect()
+    IRect getHitbox()
     {
-        return {this->getPos(), {TILESIZE, TILESIZE}};
+        // return this->sprite->hitbox + this->getPos();
+        return {this->getWorldPos(), {TILESIZE, TILESIZE}};
     }
 };
 
 class World
 {
   public:
-    Tile worldGrid[WORLD_GRID.x][WORLD_GRID.y];
+    Tile* worldGrid[WORLD_GRID.x][WORLD_GRID.y];
 
     World()
+    {}
+
+    void setTile(int x, int y, Sprite* sprite)
     {
-        for (int y = 0; y < WORLD_GRID.y; y++) {
-            for (int x = 0; x < WORLD_GRID.x; x++) {
-                this->worldGrid[x][y] = Tile(x, y);
-            }
-        }
+        this->worldGrid[x][y] = new Tile(x, y, sprite);
     }
 
     Tile* get_tile(int x, int y)
     {
         if (x >= 0 && x < WORLD_GRID.x && y >= 0 && y < WORLD_GRID.y) {
-            return &this->worldGrid[x][y];
+            return this->worldGrid[x][y];
         }
         return nullptr;
     }

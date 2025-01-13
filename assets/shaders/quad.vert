@@ -7,7 +7,7 @@
 struct Transform {
     vec2 pos;
     vec2 size;
-    ivec2 atlasOffset;
+    ivec2 spriteOffset;
     ivec2 spriteSize;
 };
 
@@ -66,10 +66,10 @@ void main()
     Transform transform = transforms[gl_InstanceID];
 
     // Calculate the texture coordinates based on the atlas offset and sprite size (pixel coordinates).
-    int left = transform.atlasOffset.x;
-    int top = transform.atlasOffset.y;
-    int right = transform.atlasOffset.x + transform.spriteSize.x;
-    int bottom = transform.atlasOffset.y + transform.spriteSize.y;
+    int left = transform.spriteOffset.x;
+    int top = transform.spriteOffset.y;
+    int right = transform.spriteOffset.x + transform.spriteSize.x;
+    int bottom = transform.spriteOffset.y + transform.spriteSize.y;
 
     // if (bool(transform.renderOptions & RENDERING_OPTION_FLIP_X)) {
     //     int tmp = left;
