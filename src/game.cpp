@@ -91,38 +91,10 @@ Sprite* get_sprite(SpriteID spriteID)
 // #tag Functions Tick Logic
 // ###############################################
 
-void handleInputActions(float deltaTime)
-{
-    World* world = gameState->world;
-
-    if (is_down(MOUSE_LEFT)) {
-        IVec2 worldPos = screen_to_world(input->mousePos);
-        IVec2 mousePosWorld = input->mousePosWorld;
-        Tile* tile = world->get_tile(worldPos);
-    }
-    if (is_down(MOUSE_RIGHT)) {
-        IVec2 worldPos = screen_to_world(input->mousePos);
-        IVec2 mousePosWorld = input->mousePosWorld;
-        Tile* tile = world->get_tile(worldPos);
-    }
-    if (just_pressed(MOUSE_SCROLL_DOWN)) {
-        FP_LOG("Key Pressed: MOUSE_SCROLL_DOWN");
-        if (is_control_pressed()) {
-            renderData->gameCamera.zoomOut();
-        }
-    }
-    if (just_pressed(MOUSE_SCROLL_UP)) {
-        FP_LOG("Key Pressed: MOUSE_SCROLL_UP");
-        if (is_control_pressed()) {
-            renderData->gameCamera.zoomIn();
-        }
-    }
-}
-
 /**
  * Analyze player->speed and move accordingly.
  */
-void updatePlayerPosition()
+void handlePlayerPositionActions()
 {
     World* world = gameState->world;
     Player* player = gameState->player;
@@ -157,23 +129,17 @@ void updatePlayerPosition()
             while (moveX) {
                 playerRect.pos.x += signMove;
 
-                // exit out of the while loop if we hit a wall or solid tile
+                // Check for Collision with the tileset immediately around us.
                 IVec2 playerGridPos = world->get_grid_pos(player->position);
                 for (int x = playerGridPos.x - 1; x <= playerGridPos.x + 1; x++) {
                     for (int y = playerGridPos.y - 1; y <= playerGridPos.y + 1; y++) {
                         Tile* tile = world->get_tile(x, y);
-                        if (!tile) {
-                            continue;
-                        }
-                        FP_LOG("=== Collision Check ===");
-                        FP_LOG("Tile: %d %d", x, y);
-                        FP_LOG("Player Rect: %d %d %d %d", playerRect.pos.x, playerRect.pos.y, playerRect.size.x, playerRect.size.y);
-                        FP_LOG("Tile Rect: %d %d %d %d", tile->getHitbox().pos.x, tile->getHitbox().pos.y, tile->getHitbox().size.x, tile->getHitbox().size.y);
-                        FP_LOG("Tile Pos: %d %d", tile->position.x, tile->position.y);
-                        if (Geometry::isColliding(playerRect, tile->getHitbox())) {
-                            FP_LOG("Collision Detected");
-                            player->speed.x = 0;
-                            return;
+
+                        if (tile && tile->canCollide()) {
+                            if (Geometry::isColliding(playerRect, tile->getHitbox())) {
+                                player->speed.y = 0;
+                                return;
+                            }
                         }
                     }
                 }
@@ -196,16 +162,19 @@ void updatePlayerPosition()
         auto movePlayerY = [&] {
             while (moveY) {
                 playerRect.pos.y += signMove;
-                // Loop through local Tiles
+
+                // Check for Collision with the tileset immediately around us.
                 IVec2 playerGridPos = world->get_grid_pos(player->position);
                 for (int x = playerGridPos.x - 1; x <= playerGridPos.x + 1; x++) {
-                    Tile* tile = world->get_tile(x, playerGridPos.y + 1);
-                    if (!tile) {
-                        continue;
-                    }
-                    if (Geometry::isColliding(playerRect, tile->getHitbox())) {
-                        player->speed.y = 0;
-                        return;
+                    for (int y = playerGridPos.y - 1; y <= playerGridPos.y + 1; y++) {
+                        Tile* tile = world->get_tile(x, y);
+
+                        if (tile && tile->canCollide()) {
+                            if (Geometry::isColliding(playerRect, tile->getHitbox())) {
+                                player->speed.y = 0;
+                                return;
+                            }
+                        }
                     }
                 }
                 // Move the Player
@@ -218,6 +187,36 @@ void updatePlayerPosition()
 
     // Update the Camera position
     renderData->gameCamera.position = {(float)player->position.x, -(float)player->position.y};
+}
+
+void handleInputActions(float deltaTime)
+{
+    World* world = gameState->world;
+
+    handlePlayerPositionActions();
+
+    if (is_down(MOUSE_LEFT)) {
+        IVec2 worldPos = screen_to_world(input->mousePos);
+        IVec2 mousePosWorld = input->mousePosWorld;
+        Tile* tile = world->get_tile(worldPos);
+    }
+    if (is_down(MOUSE_RIGHT)) {
+        IVec2 worldPos = screen_to_world(input->mousePos);
+        IVec2 mousePosWorld = input->mousePosWorld;
+        Tile* tile = world->get_tile(worldPos);
+    }
+    if (just_pressed(MOUSE_SCROLL_DOWN)) {
+        FP_LOG("Key Pressed: MOUSE_SCROLL_DOWN");
+        if (is_control_pressed()) {
+            renderData->gameCamera.zoomOut();
+        }
+    }
+    if (just_pressed(MOUSE_SCROLL_UP)) {
+        FP_LOG("Key Pressed: MOUSE_SCROLL_UP");
+        if (is_control_pressed()) {
+            renderData->gameCamera.zoomIn();
+        }
+    }
 }
 
 void intializeWorld()
@@ -253,7 +252,6 @@ void initializeGame()
 void executeGameTime(float deltaTime)
 {
     handleInputActions(deltaTime);
-    updatePlayerPosition();
 
     // Relative Mouse here, because more frames than simulations
     input->relMouse = input->mousePos - input->prevMousePos;

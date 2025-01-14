@@ -39,11 +39,15 @@ class Geometry
         return (point.x >= rect.pos.x && point.x <= rect.pos.x + rect.size.x && point.y >= rect.pos.y && point.y <= rect.pos.y + rect.size.y);
     }
 
-    static bool isColliding(IRect a, IRect b)
+    static bool isColliding(IRect rectA, IRect rectB)
     {
-        return a.pos.x < b.pos.x + b.size.x && // Collision on Left of a and right of b
-               a.pos.x + a.size.x > b.pos.x && // Collision on Right of a and left of b
-               a.pos.y < b.pos.y + b.size.y && // Collision on Bottom of a and Top of b
-               a.pos.y + a.size.y > b.pos.y;   // Collision on Top of a and Bottom of b
+        FP_LOG("=== Collision Check ===");
+        FP_LOG("Rect A (Player): Pos (%d %d) Size(%d %d)", rectA.pos.x, rectA.pos.y, rectA.size.x, rectA.size.y);
+        FP_LOG("Rect B (Tile)  : Pos (%d %d) Size(%d %d)", rectB.pos.x, rectB.pos.y, rectB.size.x, rectB.size.y);
+
+        return rectA.pos.x < rectB.pos.x + rectB.size.x && // Collision on Left of a and right of b
+               rectA.pos.x + rectA.size.x > rectB.pos.x && // Collision on Right of a and left of b
+               rectA.pos.y < rectB.pos.y + rectB.size.y && // Collision on Bottom of a and Top of b
+               rectA.pos.y + rectA.size.y > rectB.pos.y;   // Collision on Top of a and Bottom of b
     }
 };

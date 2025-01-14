@@ -53,6 +53,11 @@ struct IVec2 {
     {
         return {x / scalar, y / scalar};
     }
+
+    bool operator==(IVec2 other)
+    {
+        return x == other.x && y == other.y;
+    }
 };
 
 struct Vec2 {
@@ -140,6 +145,16 @@ struct IRect {
     IRect operator+(IVec2 startingPos)
     {
         return {pos + startingPos, size};
+    }
+
+    IRect operator-(IVec2 startingPos)
+    {
+        return {pos - startingPos, size};
+    }
+
+    bool operator==(IRect other)
+    {
+        return pos == other.pos && size == other.size;
     }
 };
 

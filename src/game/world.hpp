@@ -27,10 +27,15 @@ class Tile
         return {this->position.x * TILESIZE, this->position.y * TILESIZE};
     }
 
+    bool canCollide()
+    {
+        return this->sprite->hitbox == IRect{};
+    }
+
     IRect getHitbox()
     {
-        // return this->sprite->hitbox + this->getPos();
-        return {this->getWorldPos(), {TILESIZE, TILESIZE}};
+        return this->sprite->hitbox + this->getWorldPos();
+        // return {this->getWorldPos(), {TILESIZE, TILESIZE}};
     }
 };
 
