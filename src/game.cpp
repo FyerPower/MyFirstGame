@@ -2,6 +2,8 @@
 // #tag Includes
 // ###############################################
 
+#include "tileson.hpp"
+
 #include "game.hpp"
 #include "libs/libs.hpp"
 #include "render_interface.hpp"
@@ -9,6 +11,8 @@
 // ###############################################
 // #tag Constants
 // ###############################################
+
+const bool drawHitboxes = true;
 
 // ###############################################
 // #tag Structs
@@ -219,14 +223,40 @@ void handleInputActions(float deltaTime)
     }
 }
 
+void loadWorld(const char* worldPath)
+{
+    FP_LOG("Loading Map..");
+    World* world = gameState->world;
+    tson::Tileson t;
+    std::unique_ptr<tson::Map> map = t.parse(fs::path(worldPath));
+    if (map->getStatus() == tson::ParseStatus::OK) {
+        for (auto& layer : map->getLayers()) {
+            // For tile layers, you can get the tiles presented as a 2D map by calling getTileData()
+            // Using x and y positions in tile units.
+            if (layer.getType() == tson::LayerType::TileLayer) {
+                // When the map is of a fixed size, you can get the tiles like this
+                if (!map->isInfinite()) {
+                    auto tileData = layer.getTileData();
+                    for (auto& [id, tile] : tileData) {
+                        int tileID = tile->getId();
+                        if (tileID == 0) {
+                            continue;
+                        }
+                        world->setTile(std::get<0>(id), std::get<1>(id), get_sprite((SpriteID)(tileID - 1)));
+                    }
+                }
+            }
+        }
+        FP_LOG("Map (%s) loaded successfully", worldPath);
+    } else {
+        FP_ASSERT(false, "Map (%s) loading failed", worldPath);
+    }
+}
+
 void intializeWorld()
 {
-    World* world = gameState->world;
-    for (int y = 0; y < WORLD_GRID.y; y++) {
-        for (int x = 0; x < WORLD_GRID.x; x++) {
-            world->setTile(x, y, get_sprite(SPRITE_GRASS));
-        }
-    }
+    // Read the world data from the WorldMap.tsx file.
+    loadWorld("assets/worlds/WorldMap.tmj");
 }
 
 void initializeGame()
