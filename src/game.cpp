@@ -138,10 +138,14 @@ void handlePlayerPositionActions()
                 for (int x = playerGridPos.x - 1; x <= playerGridPos.x + 1; x++) {
                     for (int y = playerGridPos.y - 1; y <= playerGridPos.y + 1; y++) {
                         Tile* tile = world->get_tile(x, y);
+                        if (!tile) {
+                            continue;
+                        }
 
-                        if (tile && tile->canCollide()) {
-                            if (Geometry::isColliding(playerRect, tile->getHitbox())) {
-                                player->speed.y = 0;
+                        auto tileHitbox = tile->getHitbox();
+                        if (tileHitbox.has_value()) {
+                            if (Geometry::isColliding(playerRect, tileHitbox.value())) {
+                                player->speed.x = 0;
                                 return;
                             }
                         }
@@ -172,9 +176,13 @@ void handlePlayerPositionActions()
                 for (int x = playerGridPos.x - 1; x <= playerGridPos.x + 1; x++) {
                     for (int y = playerGridPos.y - 1; y <= playerGridPos.y + 1; y++) {
                         Tile* tile = world->get_tile(x, y);
+                        if (!tile) {
+                            continue;
+                        }
 
-                        if (tile && tile->canCollide()) {
-                            if (Geometry::isColliding(playerRect, tile->getHitbox())) {
+                        auto tileHitbox = tile->getHitbox();
+                        if (tileHitbox.has_value()) {
+                            if (Geometry::isColliding(playerRect, tileHitbox.value())) {
                                 player->speed.y = 0;
                                 return;
                             }
@@ -271,8 +279,8 @@ void initializeGame()
     intializeWorld();
 
     // Initialize the camera to 0,0
-    renderData->gameCamera.dimensions = {WORLD_WIDTH, WORLD_HEIGHT};
     renderData->gameCamera.position = {0, 0};
+    renderData->gameCamera.dimensions = {WORLD_WIDTH, WORLD_HEIGHT};
 
     // Mark Initialized
     gameState->initialized = true;
@@ -324,6 +332,10 @@ void drawWorld()
                 continue;
             }
             draw_tile(tile);
+
+            // if (drawHitboxes && tile->hasHitbox()) {
+            //     draw_rect(tile->getHitbox(), Colors::Red);
+            // }
         }
     }
 }

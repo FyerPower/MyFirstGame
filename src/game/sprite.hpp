@@ -4,6 +4,7 @@
 // #tag Imcludes
 // ###############################################
 
+#include <optional> // Include the optional header
 #include <array>
 #include "../libs/libs.hpp"
 
@@ -20,10 +21,9 @@ class Sprite
   public:
     IVec2 offset;
     IVec2 size;
-    IRect hitbox;
     bool isVisible = true;
 
-    Sprite(IVec2 offset, IVec2 size) : offset(offset), size(size)
+    Sprite(IVec2 offset, IVec2 size) : offset(offset), size(size), hitbox(std::nullopt)
     {}
 
     Sprite(IVec2 offset, IVec2 size, IRect hitbox) : offset(offset), size(size), hitbox(hitbox)
@@ -31,6 +31,14 @@ class Sprite
 
     ~Sprite()
     {}
+
+    std::optional<IRect> getHitbox()
+    {
+        return this->hitbox;
+    }
+
+  private:
+    std::optional<IRect> hitbox;
 };
 
 enum SpriteID {

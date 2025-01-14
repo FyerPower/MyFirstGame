@@ -27,15 +27,13 @@ class Tile
         return {this->position.x * TILESIZE, this->position.y * TILESIZE};
     }
 
-    bool canCollide()
+    std::optional<IRect> getHitbox()
     {
-        return this->sprite->hitbox == IRect{};
-    }
-
-    IRect getHitbox()
-    {
-        return this->sprite->hitbox + this->getWorldPos();
-        // return {this->getWorldPos(), {TILESIZE, TILESIZE}};
+        auto hitbox = this->sprite->getHitbox();
+        if (hitbox.has_value()) {
+            return hitbox.value() + this->getWorldPos();
+        }
+        return std::nullopt;
     }
 };
 
