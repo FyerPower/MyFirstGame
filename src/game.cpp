@@ -288,7 +288,7 @@ void initializeGame()
     FP_LOG("Game Initialized");
 }
 
-void executeGameTime(float deltaTime)
+void executeGameTick(float deltaTime)
 {
     handleInputActions(deltaTime);
 
@@ -315,8 +315,8 @@ void gameTickRunner(float deltaTime)
         gameState->internalTimer -= (float)UPDATE_DELAY;
         gameState->tickCounter++;
 
-        // FP_LOG("executeGameTime - %d", gameState->tickCounter);
-        executeGameTime(deltaTime);
+        // FP_LOG("executeGameTick - %d", gameState->tickCounter);
+        executeGameTick(deltaTime);
     }
 }
 
@@ -354,13 +354,20 @@ void drawTownFolk()
 
 void drawPlayer()
 {
-    if (gameState->player->position.x > gameState->player->previousPosition.x) {
-        draw_sprite(get_sprite(SPRITE_PLAYER_RIGHT), gameState->player->position);
-    } else if (gameState->player->position.x < gameState->player->previousPosition.x) {
-        draw_sprite(get_sprite(SPRITE_PLAYER_RIGHT), gameState->player->position, RENDERING_OPTION_FLIP_X);
-    } else if (gameState->player->position.y < gameState->player->previousPosition.y) {
+    // Draw Player Facing Up
+    if (gameState->player->position.y < gameState->player->previousPosition.y) {
         draw_sprite(get_sprite(SPRITE_PLAYER_BACK), gameState->player->position);
-    } else {
+    }
+    // Draw Player Facing Right
+    else if (gameState->player->position.x > gameState->player->previousPosition.x) {
+        draw_sprite(get_sprite(SPRITE_PLAYER_RIGHT), gameState->player->position);
+    }
+    // Draw Player Facing Left
+    else if (gameState->player->position.x < gameState->player->previousPosition.x) {
+        draw_sprite(get_sprite(SPRITE_PLAYER_RIGHT), gameState->player->position, RENDERING_OPTION_FLIP_X);
+    }
+    // Draw Player Facing Forward
+    else {
         draw_sprite(get_sprite(SPRITE_PLAYER), gameState->player->position);
     }
 
