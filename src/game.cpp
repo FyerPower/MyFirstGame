@@ -102,7 +102,6 @@ void handlePlayerPositionActions()
 {
     World* world = gameState->world;
     Player* player = gameState->player;
-    player->previousPosition = player->position;
 
     // Handle keybinds for movement
     if (is_down(MOVE_LEFT)) {
@@ -153,6 +152,7 @@ void handlePlayerPositionActions()
                 }
 
                 // Move the Player
+                player->previousPosition = player->position;
                 player->position.x += signMove;
                 moveX -= signMove;
             }
@@ -190,6 +190,7 @@ void handlePlayerPositionActions()
                     }
                 }
                 // Move the Player
+                player->previousPosition = player->position;
                 player->position.y += signMove;
                 moveY -= signMove;
             }
@@ -353,7 +354,16 @@ void drawTownFolk()
 
 void drawPlayer()
 {
-    draw_sprite(get_sprite(SPRITE_PLAYER), gameState->player->position);
+    if (gameState->player->position.x > gameState->player->previousPosition.x) {
+        draw_sprite(get_sprite(SPRITE_PLAYER_RIGHT), gameState->player->position);
+    } else if (gameState->player->position.x < gameState->player->previousPosition.x) {
+        draw_sprite(get_sprite(SPRITE_PLAYER_RIGHT), gameState->player->position, RENDERING_OPTION_FLIP_X);
+    } else if (gameState->player->position.y < gameState->player->previousPosition.y) {
+        draw_sprite(get_sprite(SPRITE_PLAYER_BACK), gameState->player->position);
+    } else {
+        draw_sprite(get_sprite(SPRITE_PLAYER), gameState->player->position);
+    }
+
     if (drawHitboxes) {
         std::optional<IRect> hitbox = gameState->player->getHitbox();
         if (hitbox.has_value()) {

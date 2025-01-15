@@ -82,13 +82,13 @@ void draw_tile(Tile* tile)
     });
 }
 
-void draw_sprite(Sprite* sprite, Vec2 pos)
+void draw_sprite(Sprite* sprite, Vec2 pos, int renderOptions)
 {
-    // Add the transform to the RenderData
     renderData->transforms.add({
         // Position and Size
         .pos = pos - vec_2(sprite->size) / 2.0f,
         .size = vec_2(sprite->size),
+        .renderOptions = renderOptions,
         // Define the type of transform
         .transformType = TRANSFORM_TYPE_SPRITE,
         .spriteOffset = sprite->offset,
@@ -96,6 +96,15 @@ void draw_sprite(Sprite* sprite, Vec2 pos)
     });
 };
 
+void draw_sprite(Sprite* sprite, Vec2 pos)
+{
+    draw_sprite(sprite, pos, RENDERING_OPTION_NONE);
+};
+
+void draw_sprite(Sprite* sprite, IVec2 pos, int renderOptions)
+{
+    draw_sprite(sprite, vec_2(pos), renderOptions);
+};
 void draw_sprite(Sprite* sprite, IVec2 pos)
 {
     draw_sprite(sprite, vec_2(pos));
