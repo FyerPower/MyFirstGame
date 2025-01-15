@@ -12,7 +12,7 @@
 // #tag Constants
 // ###############################################
 
-const bool drawHitboxes = true;
+const bool drawHitboxes = false;
 
 // ###############################################
 // #tag Structs
@@ -162,7 +162,7 @@ void handlePlayerPositionActions()
 
     // Move the Player in Y until collision or moveY is exausted
     remainder.y += player->speed.y;
-    int moveY = (int)round(remainder.y);
+    int moveY = (int)floor(remainder.y);
     if (moveY != 0) {
         remainder.y -= moveY;
         IRect playerRect = player->getHitbox();
@@ -173,8 +173,8 @@ void handlePlayerPositionActions()
 
                 // Check for Collision with the tileset immediately around us.
                 IVec2 playerGridPos = world->get_grid_pos(player->position);
-                for (int x = playerGridPos.x - 1; x <= playerGridPos.x + 1; x++) {
-                    for (int y = playerGridPos.y - 1; y <= playerGridPos.y + 1; y++) {
+                for (int y = playerGridPos.y - 1; y <= playerGridPos.y + 1; y++) {
+                    for (int x = playerGridPos.x - 1; x <= playerGridPos.x + 1; x++) {
                         Tile* tile = world->get_tile(x, y);
                         if (!tile) {
                             continue;
@@ -333,9 +333,12 @@ void drawWorld()
             }
             draw_tile(tile);
 
-            // if (drawHitboxes && tile->hasHitbox()) {
-            //     draw_rect(tile->getHitbox(), Colors::Red);
-            // }
+            if (drawHitboxes) {
+                std::optional<IRect> hitbox = tile->getHitbox();
+                if (hitbox.has_value()) {
+                    draw_rect(hitbox.value(), Colors::Green);
+                }
+            }
         }
     }
 }
@@ -351,6 +354,12 @@ void drawTownFolk()
 void drawPlayer()
 {
     draw_sprite(get_sprite(SPRITE_PLAYER), gameState->player->position);
+    if (drawHitboxes) {
+        std::optional<IRect> hitbox = gameState->player->getHitbox();
+        if (hitbox.has_value()) {
+            draw_rect(hitbox.value(), Colors::Green);
+        }
+    }
 }
 
 // ###############################################

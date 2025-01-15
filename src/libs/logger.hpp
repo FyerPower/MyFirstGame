@@ -93,9 +93,7 @@ template <typename... Args> void FP_ASSERT(bool x, const char* msg, Args&&... ar
 
         puts(textBuffer);
 
-        //
-        // error(msg, std::forward<Args>(args)...);
         DEBUG_BREAK();
-        // error("Assertion Hit", std::forward<Args>(args)...);
+        // __builtin_trap();
     }
 }

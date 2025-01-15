@@ -11,6 +11,18 @@
 #include "wglext.h"
 // #include <xaudio2.h>
 
+#include <iostream>
+#include <vector>
+
+// ###############################################
+// #tag Structs
+// ###############################################
+
+struct MonitorInfo {
+    HMONITOR hMonitor;
+    RECT rcMonitor;
+};
+
 // ###############################################
 // #tag Globals
 // ###############################################
@@ -109,6 +121,23 @@ LRESULT CALLBACK windows_callback(HWND window, UINT msg, WPARAM wParam, LPARAM l
     return result;
 };
 
+BOOL CALLBACK MonitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData)
+{
+    std::vector<MonitorInfo>* monitors = reinterpret_cast<std::vector<MonitorInfo>*>(dwData);
+    MonitorInfo info;
+    info.hMonitor = hMonitor;
+    info.rcMonitor = *lprcMonitor;
+    monitors->push_back(info);
+    return TRUE;
+}
+
+std::vector<MonitorInfo> GetMonitors()
+{
+    std::vector<MonitorInfo> monitors;
+    EnumDisplayMonitors(NULL, NULL, MonitorEnumProc, reinterpret_cast<LPARAM>(&monitors));
+    return monitors;
+}
+
 /**
  * Create Window
  */
@@ -122,6 +151,16 @@ bool platform_create_window(int width, int height, const char* title)
     wc.lpszClassName = title;                       // Application ID: Unique ID for the window
     wc.lpfnWndProc = windows_callback;              // Application Callback: Inputs into the Window
 
+    // Top Monitor Position
+    // int windowsPosX = 0;
+    // int windowsPosY = 0;
+
+    // Same Monitor
+
+    std::vector<MonitorInfo> monitors = GetMonitors();
+    int windowsPosX = monitors[1].rcMonitor.left;
+    int windowsPosY = monitors[1].rcMonitor.top;
+
     if (!RegisterClassA(&wc)) {
         return false;
     }
@@ -134,18 +173,18 @@ bool platform_create_window(int width, int height, const char* title)
 
     // Fake Window initializing OpenGL
     {
-        window = CreateWindowExA(0,        // Window Extended Styles
-                                 title,    // Class Name
-                                 title,    // Window Title
-                                 dwStyle,  // Style
-                                 -900,     // Position X
-                                 1100,     // Position Y
-                                 width,    // Width
-                                 height,   // Height
-                                 NULL,     // Parent
-                                 NULL,     // Menu
-                                 instance, // Instance
-                                 NULL      // lpParam
+        window = CreateWindowExA(0,           // Window Extended Styles
+                                 title,       // Class Name
+                                 title,       // Window Title
+                                 dwStyle,     // Style
+                                 windowsPosX, // Position X
+                                 windowsPosY, // Position Y
+                                 width,       // Width
+                                 height,      // Height
+                                 NULL,        // Parent
+                                 NULL,        // Menu
+                                 instance,    // Instance
+                                 NULL         // lpParam
         );
 
         if (window == NULL) {
@@ -222,18 +261,18 @@ bool platform_create_window(int width, int height, const char* title)
             height += borderRect.bottom - borderRect.top;
         }
 
-        window = CreateWindowExA(0,        // Window Extended Styles
-                                 title,    // Class Name
-                                 title,    // Window Title
-                                 dwStyle,  // Style
-                                 -900,     // Position X
-                                 1100,     // Position Y
-                                 width,    // Width
-                                 height,   // Height
-                                 NULL,     // Parent
-                                 NULL,     // Menu
-                                 instance, // Instance
-                                 NULL      // lpParam
+        window = CreateWindowExA(0,           // Window Extended Styles
+                                 title,       // Class Name
+                                 title,       // Window Title
+                                 dwStyle,     // Style
+                                 windowsPosX, // Position X
+                                 windowsPosY, // Position Y
+                                 width,       // Width
+                                 height,      // Height
+                                 NULL,        // Parent
+                                 NULL,        // Menu
+                                 instance,    // Instance
+                                 NULL         // lpParam
         );
 
         if (window == NULL) {

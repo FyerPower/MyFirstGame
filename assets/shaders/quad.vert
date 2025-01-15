@@ -1,24 +1,11 @@
-#version 430 core
-
-// ###############################################
-//                     Structs
-// ###############################################
-
-struct Transform {
-    vec2 pos;
-    vec2 size;
-    ivec2 spriteOffset;
-    ivec2 spriteSize;
-};
-
-/*
- *  Outputs the color of a fragment (pixel) of a quad based on the texture coordinates.
- *
- *  The quad.vert shader is a vertex shader written in GLSL (OpenGL Shading Language) that is used to process
- *  the vertices of textured quads (rectangles) in an OpenGL application. The purpose of this shader is to
- *  transform the vertices of the quads based on their positions, sizes, and other attributes, and to pass the
- *  appropriate texture coordinates to the fragment shader.
- */
+//
+//  Outputs the color of a fragment (pixel) of a quad based on the texture coordinates.
+//
+//  The quad.vert shader is a vertex shader written in GLSL (OpenGL Shading Language) that is used to process
+//  the vertices of textured quads (rectangles) in an OpenGL application. The purpose of this shader is to
+//  transform the vertices of the quads based on their positions, sizes, and other attributes, and to pass the
+//  appropriate texture coordinates to the fragment shader.
+//
 
 // ###########################################################################################################
 // Input
@@ -26,7 +13,7 @@ struct Transform {
 
 // Defines a shader storage buffer object (SSBO) named TransformSBO that contains an array of Transform
 // structs. This buffer is bound to binding point 0.
-layout(std430, binding = 0) buffer TransformSBO
+layout(binding = 0, std430) readonly buffer TransformSBO
 {
     Transform transforms[];
 };
@@ -38,8 +25,8 @@ layout(std430, binding = 0) buffer TransformSBO
 // Defines the output variable textureCoordsOut, which will hold the texture coordinates for the current
 // vertex. This will be passed to the fragment shader.
 layout(location = 0) out vec2 textureCoordsOut;
-// layout(location = 1) out flat int renderOptions;
-// layout(location = 2) out flat int materialIdx;
+layout(location = 1) out flat int transformTypeOut;
+layout(location = 2) out flat vec2 transformSizeOut;
 
 // ###########################################################################################################
 // Uniforms
@@ -60,43 +47,8 @@ uniform mat4 orthoProjection;
 //            0, 0
 // -1,-1                1,-1
 
-void main()
+void calculate_gl_position(Transform transform)
 {
-    // Get the transform data for the current instance (quad).
-    Transform transform = transforms[gl_InstanceID];
-
-    // Calculate the texture coordinates based on the atlas offset and sprite size (pixel coordinates).
-    int left = transform.spriteOffset.x;
-    int top = transform.spriteOffset.y;
-    int right = transform.spriteOffset.x + transform.spriteSize.x;
-    int bottom = transform.spriteOffset.y + transform.spriteSize.y;
-
-    // if (bool(transform.renderOptions & RENDERING_OPTION_FLIP_X)) {
-    //     int tmp = left;
-    //     left = right;
-    //     right = tmp;
-    // }
-
-    // if (bool(transform.renderOptions & RENDERING_OPTION_FLIP_Y)) {
-    //     int tmp = top;
-    //     top = bottom;
-    //     bottom = tmp;
-    // }
-
-    // Texture coordinates for the six vertices of two triangles forming a quad
-    vec2 textureCoords[6] = {
-        vec2(left, top),     // Top Left
-        vec2(left, bottom),  // Bottom Left
-        vec2(right, top),    // Top Right
-        vec2(right, top),    // Top Right
-        vec2(left, bottom),  // Bottom Left
-        vec2(right, bottom), // Bottom Right
-    };
-
-    // Set the output texture coordinates for the current vertex.  This will be passed to the fragment shader.
-    // textureCoordsOut is a built-in output variable that holds the texture coordinates for the current vertex.
-    textureCoordsOut = textureCoords[gl_VertexID];
-
     // Define the vertices of the quad based on the position and size of the transform.
     vec2 vertices[6] = {
         transform.pos,                                     // Top Left
@@ -114,4 +66,75 @@ void main()
     // Transform the vertex position by the orthographic projection matrix
     // gl_Position is a built-in output variable that holds the final position of the vertex.
     gl_Position = orthoProjection * vertexPosH;
+}
+
+void generate_texture_coordinates(Transform transform)
+{
+    // Calculate the texture coordinates based on the atlas offset and sprite size (pixel coordinates).
+    int left = transform.spriteOffset.x;
+    int top = transform.spriteOffset.y;
+    int right = transform.spriteOffset.x + transform.spriteSize.x;
+    int bottom = transform.spriteOffset.y + transform.spriteSize.y;
+
+    // Flip X?
+    if (bool(transform.renderOptions & RENDERING_OPTION_FLIP_X)) {
+        int tmp = left;
+        left = right;
+        right = tmp;
+    }
+
+    // Flip Y?
+    if (bool(transform.renderOptions & RENDERING_OPTION_FLIP_Y)) {
+        int tmp = top;
+        top = bottom;
+        bottom = tmp;
+    }
+
+    // Texture coordinates for the six vertices of two triangles forming a quad
+    vec2 textureCoords[6] = {
+        vec2(left, top),     // Top Left
+        vec2(left, bottom),  // Bottom Left
+        vec2(right, top),    // Top Right
+        vec2(right, top),    // Top Right
+        vec2(left, bottom),  // Bottom Left
+        vec2(right, bottom), // Bottom Right
+    };
+
+    // Set the output texture coordinates for the current vertex.  This will be passed to the fragment shader.
+    // textureCoordsOut is a built-in output variable that holds the texture coordinates for the current vertex.
+    textureCoordsOut = textureCoords[gl_VertexID];
+}
+
+void generate_outline_coordinates(Transform transform)
+{
+    // Texture coordinates for the six vertices of two triangles forming a quad
+    vec2 textureCoords[6] = {
+        vec2(0, 0),                               // Top Left
+        vec2(0, transform.size.y),                // Bottom Left
+        vec2(transform.size.x, 0),                // Top Right
+        vec2(transform.size.x, 0),                // Top Right
+        vec2(0, transform.size.y),                // Bottom Left
+        vec2(transform.size.x, transform.size.y), // Bottom Right
+    };
+    textureCoordsOut = textureCoords[gl_VertexID];
+}
+
+void main()
+{
+    // Get the transform data for the current instance (quad).
+    Transform transform = transforms[gl_InstanceID];
+    transformTypeOut = transform.transformType;
+    transformSizeOut = transform.size;
+
+    // Calculate the final position of the vertex based on the orthographic projection.
+    calculate_gl_position(transform);
+
+    // If the transform is a texture... generate the texture coordinates.
+    if (bool(transform.transformType & TRANSFORM_TYPE_SPRITE)) {
+        generate_texture_coordinates(transform);
+    }
+    // If the transform is a texture... generate the texture coordinates.
+    else if (bool(transform.transformType & TRANSFORM_TYPE_OUTLINE)) {
+        generate_outline_coordinates(transform);
+    }
 }

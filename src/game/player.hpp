@@ -17,7 +17,7 @@ class Player
 
     IRect getHitbox()
     {
-        return {{this->position.x - (this->size.x / 2), this->position.y - (this->size.y / 2)}, {this->size.x, this->size.y}};
+        return {{this->position.x - 5, this->position.y - 2}, {10, 10}};
     }
     void setSpeedX(int sign)
     {

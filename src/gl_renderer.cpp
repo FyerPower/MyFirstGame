@@ -67,14 +67,13 @@ GLuint gl_create_shaders(GLenum shaderType, const char* shaderPath, BumpAllocato
         FP_ASSERT(false, "Failed to load shader: %s", shaderPath);
         return 0;
     }
-    // char* shaderHeader = read_file("src/shaders/shared_header.hpp", &fileSize, transientStorage);
-    // if (!shaderHeader) {
-    //     FP_ASSERT(false, "Failed to load shader header");
-    //     return 0;
-    // }
-    const char* shaderSources[] = {shader};
+    char* shaderHeader = read_file("src/shaders/shared_header.hpp", &fileSize, transientStorage);
+    if (!shaderHeader) {
+        FP_ASSERT(false, "Failed to load shader header");
+        return 0;
+    }
+    const char* shaderSources[] = {"#version 430 core \r\n", shaderHeader, shader};
     glShaderSource(shaderId, ArraySize(shaderSources), shaderSources, 0);
-    glShaderSource(shaderId, 1, &shader, 0);
     glCompileShader(shaderId);
 
     // Test if shaders compiled successfully
@@ -84,7 +83,7 @@ GLuint gl_create_shaders(GLenum shaderType, const char* shaderPath, BumpAllocato
         glGetShaderiv(shaderId, GL_COMPILE_STATUS, &success);
         if (!success) {
             glGetShaderInfoLog(shaderId, 2048, 0, shaderLog);
-            FP_ASSERT(false, "Failed to compile Shaders %s", shaderLog);
+            FP_ASSERT(false, "Failed to Compile Shaders (%s) - %s", shaderPath, shaderLog);
             return 0;
         }
     }

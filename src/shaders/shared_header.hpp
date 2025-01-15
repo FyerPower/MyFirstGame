@@ -1,11 +1,6 @@
 #ifdef ENGINE // Inside Game / Engine
 #pragma once
-
 #include "../libs/libs.hpp"
-#define vec2 Vec2
-#define ivec2 IVec2
-#define vec4 Vec4
-
 #else // Inside Shader
 #define BIT(i) 1 << i
 #endif
@@ -27,28 +22,40 @@ int TRANSFORM_TYPE_OUTLINE = BIT(1);
 //                           Rendering Structs
 // #############################################################################
 
-// Transformation Object that holds information about what is being rendered
-struct Transform {
-    vec2 pos;           // The position in the world
-    vec2 size;          // The size the sprite should be rendered as
-    ivec2 spriteOffset; // The offset (in pixels) in the texture file this a sprite is located
-    ivec2 spriteSize;   // The size (in pixels) this sprite is
+// Size and Alignment of basic types:
+// bool => 1
+// char => 1
+// (unsigned) int => 4
+// (unsigned) long long => 8
+// (unsigned) float => 4
+// (unsigned) double => 8
+// (unsigned) long double => 16
+// pointers (64-bit system) => 8
 
-    // int renderOptions;
-    // int materialIdx;
-    // float layer;
-    // int padding;
+// Alignments of Structs in C++ are based on the largest member in the struct.
+//
+
+#ifdef ENGINE // Inside Game / Engine
+
+// Transformation Object that holds information about what is being rendered
+struct alignas(8) Transform {
+    Vec2 pos;           // The position in the world.
+    Vec2 size;          // The size the sprite should be rendered as.
+    int renderOptions;  // The options for rendering this object.
+    int transformType;  // The type of transformation this is.
+    IVec2 spriteOffset; // The offset (in pixels) in the texture file this a sprite is located.
+    IVec2 spriteSize;   // The size (in pixels) this sprite is in the texture file.
 };
 
-// struct Material {
-//     // Operator inside the Engine to compare materials
-// #ifdef ENGINE
-//     Color color = Colors::White;
-//     bool operator==(Material other)
-//     {
-//         return color == other.color;
-//     }
-// #else
-//     vec4 color;
-// #endif
-// };
+#else // Inside Shader
+
+struct Transform {
+    vec2 pos;
+    vec2 size;
+    int renderOptions;
+    int transformType;
+    ivec2 spriteOffset;
+    ivec2 spriteSize;
+};
+
+#endif

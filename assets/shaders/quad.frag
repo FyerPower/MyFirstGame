@@ -1,14 +1,12 @@
-#version 430 core
-
-/*
- *  Outputs the color of a fragment (pixel) of a quad based on the texture coordinates.
- * 
- *  The quad.frag shader is a fragment shader written in GLSL (OpenGL Shading Language) that is used to 
- *  render textured quads (rectangles) in an OpenGL application. The purpose of this shader is to fetch 
- *  the color from a texture atlas based on the provided texture coordinates and output the final color 
- *  for each fragment (pixel) of the quad. Additionally, it discards fragments with zero alpha, making 
- *  them fully transparent.
- */
+//
+//  Outputs the color of a fragment (pixel) of a quad based on the texture coordinates.
+// 
+//  The quad.frag shader is a fragment shader written in GLSL (OpenGL Shading Language) that is used to 
+//  render textured quads (rectangles) in an OpenGL application. The purpose of this shader is to fetch 
+//  the color from a texture atlas based on the provided texture coordinates and output the final color 
+//  for each fragment (pixel) of the quad. Additionally, it discards fragments with zero alpha, making 
+//  them fully transparent.
+//
 
 // ###########################################################################################################
 // Inputs
@@ -18,8 +16,8 @@
 // ###########################################################################################################
 
 layout(location = 0) in vec2 textureCoordsIn;
-// layout(location = 1) in flat int renderOptions;
-// layout(location = 2) in flat int materialIndex;
+layout(location = 1) in flat int transformTypeIn;
+layout(location = 2) in flat vec2 transformSizeIn;
 
 // ###########################################################################################################
 // Output
@@ -55,14 +53,36 @@ layout(binding = 0) uniform sampler2D textureAtlas;
 
 void main()
 {
-    // Fetches the color from the texture atlas at the specified integer texture coordinates.
-    vec4 textureColor = texelFetch(textureAtlas, ivec2(textureCoordsIn), 0);
+    // If the transform is a texture... generate the texture coordinates.
+    if (bool(transformTypeIn & TRANSFORM_TYPE_SPRITE)) {
+        // Fetches the color from the texture atlas at the specified integer texture coordinates.
+        vec4 textureColor = texelFetch(textureAtlas, ivec2(textureCoordsIn), 0);
 
-    // Discards the fragment if its alpha value is zero, making it fully transparent.
-    if(textureColor.a == 0.0) {
-        discard;
+        // Discards the fragment if its alpha value is zero, making it fully transparent.
+        if(textureColor.a == 0.0) {
+            discard;
+        }
+
+        // Sets the output color of the fragment to the fetched texture color.
+        fragColor = textureColor;
+        return;
+    } else if (bool(transformTypeIn & TRANSFORM_TYPE_OUTLINE)) {
+        float left = textureCoordsIn.x;
+        float right = transformSizeIn.x - textureCoordsIn.x;
+        float top = textureCoordsIn.y;
+        float bottom = transformSizeIn.y - textureCoordsIn.y;
+
+        // Determine the minimum distance to the edge
+        float minDistance = min(left, min(right, min(top, bottom)));
+
+        // Set the border color if within a certain distance from the edge
+        if (minDistance < 3.0) {
+            fragColor = vec4(1, 1, 0, 1 - minDistance / 3.0);
+        } else {
+            discard;
+        }
+        return;
     }
 
-    // Sets the output color of the fragment to the fetched texture color.
-    fragColor = textureColor;
+    discard;
 }

@@ -31,7 +31,7 @@ class Tile
     {
         auto hitbox = this->sprite->getHitbox();
         if (hitbox.has_value()) {
-            return hitbox.value() + this->getWorldPos();
+            return hitbox.value() + this->getWorldPos() - (IVec2{TILESIZE, TILESIZE} / 2);
         }
         return std::nullopt;
     }

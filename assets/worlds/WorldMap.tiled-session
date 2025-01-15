@@ -13,11 +13,11 @@
             "scaleInEditor": 5.5
         },
         "WorldMap.tmj": {
-            "scale": 5.5,
+            "scale": 4,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 165.09090909090907,
-                "y": 145.1818181818182
+                "x": 260.875,
+                "y": 150.5
             }
         }
     },

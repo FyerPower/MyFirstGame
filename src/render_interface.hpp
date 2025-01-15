@@ -76,6 +76,7 @@ void draw_tile(Tile* tile)
         .pos = vec_2(tile->getWorldPos()) - vec_2(sprite->size) / 2.0f,
         .size = vec_2(sprite->size),
         // Define the type of transform
+        .transformType = TRANSFORM_TYPE_SPRITE,
         .spriteOffset = sprite->offset,
         .spriteSize = sprite->size,
     });
@@ -89,6 +90,7 @@ void draw_sprite(Sprite* sprite, Vec2 pos)
         .pos = pos - vec_2(sprite->size) / 2.0f,
         .size = vec_2(sprite->size),
         // Define the type of transform
+        .transformType = TRANSFORM_TYPE_SPRITE,
         .spriteOffset = sprite->offset,
         .spriteSize = sprite->size,
     });
@@ -99,10 +101,12 @@ void draw_sprite(Sprite* sprite, IVec2 pos)
     draw_sprite(sprite, vec_2(pos));
 };
 
-void draw_rect(IRect rect, const Color& color) {
-    // Transform transform = {};
-    // transform.pos = vec_2(rect.pos);
-    // transform.size = vec_2(rect.size);
-    // transform.renderOptions = RENDERING_OPTION_OUTLINE;
-    // renderData->transforms.add(transform);
+void draw_rect(IRect rect, const Color& color)
+{
+    renderData->transforms.add({// Position and Size
+                                .pos = vec_2(rect.pos),
+                                .size = vec_2(rect.size),
+                                // Define the type of transform
+                                .transformType = TRANSFORM_TYPE_OUTLINE});
+    // FP_LOG("SIZE: %d %d", rect.size.x, rect.size.y);
 };
