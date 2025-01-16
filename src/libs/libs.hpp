@@ -4,7 +4,11 @@
 // #tag Includes
 // ###############################################
 
+// Define commonly used types
 #include "generic_types.hpp"
+
+// Configuration Constants
+#include "constants.hpp"
 
 #include "colors.hpp"
 

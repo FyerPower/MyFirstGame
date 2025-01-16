@@ -41,10 +41,6 @@ class Geometry
 
     static bool isColliding(IRect rectA, IRect rectB)
     {
-        FP_LOG("=== Collision Check ===");
-        FP_LOG("Rect A (Player): Pos (%d %d) Size(%d %d)", rectA.pos.x, rectA.pos.y, rectA.size.x, rectA.size.y);
-        FP_LOG("Rect B (Tile)  : Pos (%d %d) Size(%d %d)", rectB.pos.x, rectB.pos.y, rectB.size.x, rectB.size.y);
-
         return rectA.pos.x < rectB.pos.x + rectB.size.x && // Collision on Left of a and right of b
                rectA.pos.x + rectA.size.x > rectB.pos.x && // Collision on Right of a and left of b
                rectA.pos.y < rectB.pos.y + rectB.size.y && // Collision on Bottom of a and Top of b

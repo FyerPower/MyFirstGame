@@ -10,8 +10,8 @@
 #define GL_GLEXT_PROTOTYPES
 #include "glcorearb.h"
 
-// Used to get Delta Time
-#include <chrono>
+#include <chrono> // Used to get Delta Time
+#include <string> // for string class
 
 // ###############################################
 // #tag Platforms
@@ -130,9 +130,10 @@ int main()
     }
 
     // Create the Window
-    input->screenSize.x = 1280;
-    input->screenSize.y = 852;
-    platform_create_window(input->screenSize.x, input->screenSize.y, "My Game");
+    input->screenSize.x = WINDOW_SIZE_X;
+    input->screenSize.y = WINDOW_SIZE_Y;
+    std::string windowTitle = DEBUG_MODE == true ? (std::string(WINDOW_TITLE) + " (Debug Mode)") : WINDOW_TITLE;
+    platform_create_window(input->screenSize.x, input->screenSize.y, windowTitle.c_str());
     FP_LOG("Window Created");
 
     // Assign keys per platform

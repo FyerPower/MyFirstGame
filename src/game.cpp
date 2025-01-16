@@ -9,12 +9,6 @@
 #include "render_interface.hpp"
 
 // ###############################################
-// #tag Constants
-// ###############################################
-
-const bool drawHitboxes = false;
-
-// ###############################################
 // #tag Structs
 // ###############################################
 
@@ -334,7 +328,7 @@ void drawWorld()
             }
             draw_tile(tile);
 
-            if (drawHitboxes) {
+            if (DEBUG_MODE_SHOW_HITBOXES) {
                 std::optional<IRect> hitbox = tile->getHitbox();
                 if (hitbox.has_value()) {
                     draw_rect(hitbox.value(), Colors::Green);
@@ -371,7 +365,7 @@ void drawPlayer()
         draw_sprite(get_sprite(SPRITE_PLAYER), gameState->player->position);
     }
 
-    if (drawHitboxes) {
+    if (DEBUG_MODE_SHOW_HITBOXES) {
         std::optional<IRect> hitbox = gameState->player->getHitbox();
         if (hitbox.has_value()) {
             draw_rect(hitbox.value(), Colors::Green);
