@@ -4,9 +4,9 @@
 
 #include "tileson.hpp"
 
-#include "game.hpp"
-#include "libs/libs.hpp"
-#include "render_interface.hpp"
+#include "shared/libs/libs.hpp"
+#include "game/game.hpp"
+#include "game/render_interface.hpp"
 
 // ###############################################
 // #tag Structs

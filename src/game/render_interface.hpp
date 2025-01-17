@@ -4,36 +4,11 @@
 // #tag Imcludes
 // ###############################################
 
-#include "libs/libs.hpp"
-#include "shaders/shared_header.hpp"
-#include "game/camera.hpp"
-#include "game/sprite.hpp"
-#include "game/world.hpp"
-
-// #############################################################################
-// #tag Constants
-// #############################################################################
-
-// #############################################################################
-// #tag Structs
-// #############################################################################
-
-// A store for all of our Rendered Objects
-class RenderData
-{
-  public:
-    OrthographicCamera2D gameCamera;
-    OrthographicCamera2D uiCamera;
-
-    Array<Transform, 1000> transforms; // Transformation Store
-    // Array<Material, 1000> materials;   // Transformation Store
-};
-
-// #############################################################################
-// #tag Globals
-// #############################################################################
-
-static RenderData* renderData;
+#include "shared/libs/libs.hpp"
+#include "shared/models/render_data.hpp"
+#include "shared/camera.hpp"
+#include "game/models/sprite.hpp"
+#include "game/models/world.hpp"
 
 // #############################################################################
 // #tag Utilities

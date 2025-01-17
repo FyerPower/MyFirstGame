@@ -2,9 +2,9 @@
 // #tag Includes
 // ###############################################
 
-#include "libs/libs.hpp"
-#include "input.hpp"
-#include "game.hpp"
+#include "shared/libs/libs.hpp"
+#include "shared/models/input.hpp"
+#include "game/game.hpp"
 
 #define APIENTRY
 #define GL_GLEXT_PROTOTYPES
@@ -18,17 +18,17 @@
 // ###############################################
 
 static KeyCodeID KeyCodeLookupTable[KEY_COUNT];
-#include "platform/platform.hpp"
+#include "shared/platform/platform.hpp"
 
 #ifdef _WIN32
-#include "platform/platform_windows.cpp"
+#include "shared/platform/platform_windows.cpp"
 #elif __linux__
-#include "platform/platform_linux.cpp"
+#include "shared/platform/platform_linux.cpp"
 #elif __APPLE__
-#include "platform/platform_mac.cpp"
+#include "shared/platform/platform_mac.cpp"
 #endif
 
-#include "gl_renderer.cpp"
+#include "open_gl_renderer.cpp"
 
 // ###############################################
 // #tag Functions

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "../libs/libs.hpp"
+#include "libs/generic_types.hpp"
+#include "libs/geometry.hpp"
 
 class OrthographicCamera2D
 {
@@ -21,11 +22,6 @@ class OrthographicCamera2D
                                                  position.x + zoomedDimensions.x / 2,  // right
                                                  position.y + zoomedDimensions.y / 2,  // top
                                                  position.y - zoomedDimensions.y / 2); // bottom
-
-        // Mat4 orthoProjection = Geometry::orthographic_projection(camera.position.x - camera.dimensions.x / 2.0f,  // left
-        //                                                          camera.position.x + camera.dimensions.x / 2.0f,  // right
-        //                                                          camera.position.y - camera.dimensions.y / 2.0f,  // top
-        //                                                          camera.position.y + camera.dimensions.y / 2.0f); // bottom
     }
 
     void zoomIn()

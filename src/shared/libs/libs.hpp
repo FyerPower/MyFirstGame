@@ -23,5 +23,3 @@
 #include "geometry.hpp"
 
 #include "array.hpp"
-
-#include "fps_counter.hpp"

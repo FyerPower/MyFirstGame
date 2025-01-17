@@ -1,8 +1,8 @@
 #pragma once
 
 #include "platform.hpp"
-#include "../input.hpp"
-#include "../libs/libs.hpp"
+#include "shared/models/input.hpp"
+#include "shared/libs/libs.hpp"
 
 #undef APIENTRY // windows redefines this
 #define WIN32_LEAN_AND_MEAN

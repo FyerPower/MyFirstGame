@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../libs/libs.hpp"
-#include "config.hpp"
-#include "sprite.hpp"
+#include "shared/libs/libs.hpp"
+#include "game/models/config.hpp"
+#include "game/models/sprite.hpp"
 
 class Tile
 {

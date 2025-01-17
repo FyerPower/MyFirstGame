@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Include directories
-include_directories(third_party third_party/opengl)
+include_directories(src third_party third_party/opengl)
 
 # Compiler warnings
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
@@ -23,13 +23,13 @@ endif()
 set(LIBS user32 opengl32 gdi32)
 
 # Executable target
-add_executable(game src/main.cpp) # Executable
+add_executable(game src/engine/engine.cpp) # Executable
 target_compile_definitions(game PRIVATE ENGINE)
 target_link_libraries(game ${LIBS}) # Link libraries
 set_target_properties(game PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/builds) # Output Director
 
 # Shared library target
-add_library(game_shared SHARED src/game.cpp) # Shared library
+add_library(game_shared SHARED src/game/game.cpp) # Shared library
 target_compile_definitions(game_shared PRIVATE ENGINE)
 target_link_libraries(game_shared ${LIBS}) # Link libraries
 set_target_properties(game_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/builds) # Output Directory

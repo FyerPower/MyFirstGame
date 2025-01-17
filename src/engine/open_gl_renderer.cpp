@@ -7,10 +7,9 @@
 #define GL_GLEXT_PROTOTYPES
 #include "glcorearb.h"
 
-#include "libs/libs.hpp"
-#include "input.hpp"
-#include "gl_renderer.hpp"
-#include "render_interface.hpp"
+#include "shared/libs/libs.hpp"
+#include "shared/models/input.hpp"
+#include "open_gl_wrapper.hpp"
 
 // To Load PNG Files
 #define STB_IMAGE_IMPLEMENTATION
@@ -67,12 +66,12 @@ GLuint gl_create_shaders(GLenum shaderType, const char* shaderPath, BumpAllocato
         FP_ASSERT(false, "Failed to load shader: %s", shaderPath);
         return 0;
     }
-    char* shaderHeader = read_file("src/shaders/shared_header.hpp", &fileSize, transientStorage);
-    if (!shaderHeader) {
+    char* transformHeader = read_file("src/shared/models/transform.hpp", &fileSize, transientStorage);
+    if (!transformHeader) {
         FP_ASSERT(false, "Failed to load shader header");
         return 0;
     }
-    const char* shaderSources[] = {"#version 430 core \r\n", shaderHeader, shader};
+    const char* shaderSources[] = {"#version 430 core \r\n", transformHeader, shader};
     glShaderSource(shaderId, ArraySize(shaderSources), shaderSources, 0);
     glCompileShader(shaderId);
 

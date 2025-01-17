@@ -5,14 +5,14 @@
 // ###############################################
 
 #include <array>
-#include "libs/libs.hpp"
-#include "input.hpp"
-#include "render_interface.hpp"
+#include "shared/libs/libs.hpp"
+#include "shared/models/input.hpp"
+#include "game/render_interface.hpp"
 
-#include "game/config.hpp"
-#include "game/player.hpp"
-#include "game/world.hpp"
-#include "game/sprite.hpp"
+#include "game/models/config.hpp"
+#include "game/models/player.hpp"
+#include "game/models/world.hpp"
+#include "game/models/sprite.hpp"
 
 // ###############################################
 // #tag Structs

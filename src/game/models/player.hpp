@@ -1,7 +1,7 @@
 #pragma once
 
 #include "config.hpp"
-#include "../libs/libs.hpp"
+#include "shared/libs/libs.hpp"
 
 class Player
 {

@@ -1,6 +1,6 @@
 #ifdef ENGINE // Inside Game / Engine
 #pragma once
-#include "../libs/libs.hpp"
+#include "../libs/generic_types.hpp"
 #else // Inside Shader
 #define BIT(i) 1 << i
 #endif
