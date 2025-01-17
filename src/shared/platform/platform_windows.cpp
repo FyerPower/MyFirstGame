@@ -54,7 +54,7 @@ LRESULT CALLBACK windows_callback(HWND window, UINT msg, WPARAM wParam, LPARAM l
             input->screenSize.x = rect.right - rect.left;
             input->screenSize.y = rect.bottom - rect.top;
 
-            FP_LOG("Window Resized.. x(%d) y(%d)", input->screenSize.x, input->screenSize.y);
+            Logger::log("Window Resized.. x(%d) y(%d)", input->screenSize.x, input->screenSize.y);
             break;
         }
 
@@ -70,7 +70,7 @@ LRESULT CALLBACK windows_callback(HWND window, UINT msg, WPARAM wParam, LPARAM l
             key->isDown = isDown;
             key->halfTransitionCount++;
 
-            FP_LOG("Key Event Triggered.. keyCode(%d) isDown(%d)", (int)wParam, isDown);
+            Logger::log("Key Event Triggered.. keyCode(%d) isDown(%d)", (int)wParam, isDown);
             break;
         }
 
@@ -91,7 +91,7 @@ LRESULT CALLBACK windows_callback(HWND window, UINT msg, WPARAM wParam, LPARAM l
             key->isDown = isDown;
             key->halfTransitionCount++;
 
-            // FP_LOG("Mouse Event Triggered.. keyCode(%d) isDown(%d)", (int)wParam, isDown);
+            // Logger::log("Mouse Event Triggered.. keyCode(%d) isDown(%d)", (int)wParam, isDown);
             break;
         }
 
@@ -188,13 +188,13 @@ bool platform_create_window(int width, int height, const char* title)
         );
 
         if (window == NULL) {
-            FP_ASSERT(false, "Failed to create Windows Window");
+            Logger::asssert(false, "Failed to create Windows Window");
             return false;
         }
 
         HDC fakeDC = GetDC(window);
         if (!fakeDC) {
-            FP_ASSERT(false, "Failed to get HDC");
+            Logger::asssert(false, "Failed to get HDC");
             return false;
         }
 
@@ -209,25 +209,25 @@ bool platform_create_window(int width, int height, const char* title)
 
         int pixelFormat = ChoosePixelFormat(fakeDC, &pfd);
         if (!pixelFormat) {
-            FP_ASSERT(false, "Failed to choose pixel Format");
+            Logger::asssert(false, "Failed to choose pixel Format");
             return false;
         }
 
         //
         if (!SetPixelFormat(fakeDC, pixelFormat, &pfd)) {
-            FP_ASSERT(false, "Failed to set pixel format");
+            Logger::asssert(false, "Failed to set pixel format");
             return false;
         }
 
         // Create a Handle to a fake OpenGL Rendering Context
         HGLRC fakeRC = wglCreateContext(fakeDC);
         if (!fakeRC) {
-            FP_ASSERT(false, "Failed to create Render context");
+            Logger::asssert(false, "Failed to create Render context");
             return false;
         }
 
         if (!wglMakeCurrent(fakeDC, fakeRC)) {
-            FP_ASSERT(false, "Failed to make current");
+            Logger::asssert(false, "Failed to make current");
             return false;
         }
 
@@ -236,7 +236,7 @@ bool platform_create_window(int width, int height, const char* title)
         wglSwapIntervalEXT_ptr = (PFNWGLSWAPINTERVALEXTPROC)platform_load_gl_function("wglSwapIntervalEXT");
 
         if (!wglCreateContextAttribsARB || !wglChoosePixelFormatARB) {
-            FP_ASSERT(false, "Failed to load OpenGL functions");
+            Logger::asssert(false, "Failed to load OpenGL functions");
             return false;
         }
 
@@ -276,13 +276,13 @@ bool platform_create_window(int width, int height, const char* title)
         );
 
         if (window == NULL) {
-            FP_ASSERT(false, "Failed to create Windows Window");
+            Logger::asssert(false, "Failed to create Windows Window");
             return false;
         }
 
         dc = GetDC(window);
         if (!dc) {
-            FP_ASSERT(false, "Failed to get DC");
+            Logger::asssert(false, "Failed to get DC");
             return false;
         }
 
@@ -314,7 +314,7 @@ bool platform_create_window(int width, int height, const char* title)
                                      0, // Float List
                                      1, // Max Formats
                                      &pixelFormat, &numPixelFormats)) {
-            FP_ASSERT(0, "Failed to wglChoosePixelFormatARB");
+            Logger::asssert(0, "Failed to wglChoosePixelFormatARB");
             return false;
         }
 
@@ -322,7 +322,7 @@ bool platform_create_window(int width, int height, const char* title)
         DescribePixelFormat(dc, pixelFormat, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
 
         if (!SetPixelFormat(dc, pixelFormat, &pfd)) {
-            FP_ASSERT(0, "Failed to SetPixelFormat");
+            Logger::asssert(0, "Failed to SetPixelFormat");
             return true;
         }
 
@@ -340,12 +340,12 @@ bool platform_create_window(int width, int height, const char* title)
 
         HGLRC rc = wglCreateContextAttribsARB(dc, 0, contextAttribs);
         if (!rc) {
-            FP_ASSERT(0, "Failed to crate Render Context for OpenGL");
+            Logger::asssert(0, "Failed to crate Render Context for OpenGL");
             return false;
         }
 
         if (!wglMakeCurrent(dc, rc)) {
-            FP_ASSERT(0, "Failed to wglMakeCurrent");
+            Logger::asssert(0, "Failed to wglMakeCurrent");
             return false;
         }
     }
@@ -393,7 +393,7 @@ void* platform_load_gl_function(const char* funcName)
 
         // If even that fails, assert an error and return with a nullptr.
         if (!proc) {
-            FP_ASSERT(proc, "Failed to load gl function %s", "glCreateProgram");
+            Logger::asssert(proc, "Failed to load gl function %s", "glCreateProgram");
             return nullptr;
         }
     }
@@ -408,21 +408,21 @@ void platform_swap_buffers()
 void* platform_load_dynamic_library(const char* dll)
 {
     HMODULE result = LoadLibraryA(dll);
-    FP_ASSERT(result, "Failed to load dll: %s", dll);
+    Logger::asssert(result, "Failed to load dll: %s", dll);
     return result;
 }
 
 void* platform_load_dynamic_function(void* dll, const char* funName)
 {
     FARPROC proc = GetProcAddress((HMODULE)dll, funName);
-    FP_ASSERT(proc, "Failed to load function: %s from DLL", funName);
+    Logger::asssert(proc, "Failed to load function: %s from DLL", funName);
     return (void*)proc;
 }
 
 bool platform_free_dynamic_library(void* dll)
 {
     BOOL freeResult = FreeLibrary((HMODULE)dll);
-    FP_ASSERT(freeResult, "Failed to FreeLibrary");
+    Logger::asssert(freeResult, "Failed to FreeLibrary");
     return (bool)freeResult;
 }
 

@@ -14,7 +14,7 @@ class Tile
     {}
     Tile(int x, int y)
     {
-        FP_ASSERT(false, "Tile Created without Parameters");
+        Logger::asssert(false, "Tile Created without Parameters");
     }
     Tile(int x, int y, Sprite* sprite = nullptr)
     {

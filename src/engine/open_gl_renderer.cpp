@@ -51,9 +51,9 @@ static GLContext glContext;
 static void APIENTRY gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* user)
 {
     if (severity == GL_DEBUG_SEVERITY_LOW || severity == GL_DEBUG_SEVERITY_MEDIUM || severity == GL_DEBUG_SEVERITY_HIGH) {
-        FP_ASSERT(false, "OpenGL Error: %s", message);
+        Logger::asssert(false, "OpenGL Error: %s", message);
     } else {
-        FP_LOG((char*)message);
+        Logger::log((char*)message);
     }
 }
 
@@ -63,12 +63,12 @@ GLuint gl_create_shaders(GLenum shaderType, const char* shaderPath, BumpAllocato
     GLuint shaderId = glCreateShader(shaderType);
     char* shader = read_file(shaderPath, &fileSize, transientStorage);
     if (!shader) {
-        FP_ASSERT(false, "Failed to load shader: %s", shaderPath);
+        Logger::asssert(false, "Failed to load shader: %s", shaderPath);
         return 0;
     }
     char* transformHeader = read_file("src/shared/models/transform.hpp", &fileSize, transientStorage);
     if (!transformHeader) {
-        FP_ASSERT(false, "Failed to load shader header");
+        Logger::asssert(false, "Failed to load shader header");
         return 0;
     }
     const char* shaderSources[] = {"#version 430 core \r\n", transformHeader, shader};
@@ -82,7 +82,7 @@ GLuint gl_create_shaders(GLenum shaderType, const char* shaderPath, BumpAllocato
         glGetShaderiv(shaderId, GL_COMPILE_STATUS, &success);
         if (!success) {
             glGetShaderInfoLog(shaderId, 2048, 0, shaderLog);
-            FP_ASSERT(false, "Failed to Compile Shaders (%s) - %s", shaderPath, shaderLog);
+            Logger::asssert(false, "Failed to Compile Shaders (%s) - %s", shaderPath, shaderLog);
             return 0;
         }
     }
@@ -99,14 +99,14 @@ bool has_updated_shaders()
 
 bool load_program_and_shaders(BumpAllocator* transientStorage)
 {
-    FP_LOG("Loading Shaders");
+    Logger::log("Loading Shaders");
 
     // create our shaders
     GLuint vertShaderID = gl_create_shaders(GL_VERTEX_SHADER, "assets/shaders/quad.vert", transientStorage);
     GLuint fragShaderID = gl_create_shaders(GL_FRAGMENT_SHADER, "assets/shaders/quad.frag", transientStorage);
 
     if (!vertShaderID || !fragShaderID) {
-        FP_ASSERT(false, "Failed to create shaders");
+        Logger::asssert(false, "Failed to create shaders");
         return false;
     }
 
@@ -132,7 +132,7 @@ bool load_program_and_shaders(BumpAllocator* transientStorage)
     glGetProgramiv(programID, GL_LINK_STATUS, &programSuccess);
     if (!programSuccess) {
         glGetProgramInfoLog(programID, 512, 0, programInfoLog);
-        FP_ASSERT(false, "Failed to link program: %s", programInfoLog);
+        Logger::asssert(false, "Failed to link program: %s", programInfoLog);
         return false;
     }
 
@@ -153,13 +153,13 @@ bool has_updated_textures()
 
 bool load_textures()
 {
-    FP_LOG("Loading Textures");
+    Logger::log("Loading Textures");
 
     int width, height, channels;
     unsigned char* data = stbi_load(TEXTURE_PATH, &width, &height, &channels, STBI_rgb_alpha);
 
     if (!data) {
-        FP_ASSERT(false, "Failed to Load Image");
+        Logger::asssert(false, "Failed to Load Image");
         return false;
     }
 
@@ -173,7 +173,7 @@ bool load_textures()
     // Update our timestamp
     glContext.textureTimestamp = get_timestamp(TEXTURE_PATH);
 
-    FP_LOG("Successfully Loaded Textures(%s) Width(%d) Height(%d) Channels(%d)", TEXTURE_PATH, width, height, channels);
+    Logger::log("Successfully Loaded Textures(%s) Width(%d) Height(%d) Channels(%d)", TEXTURE_PATH, width, height, channels);
     return true;
 }
 
@@ -257,11 +257,11 @@ void gl_render(BumpAllocator* transientStorage)
 {
     // Hot Reloading - Textures
     if (has_updated_textures() && !load_textures()) {
-        FP_ERROR("Textures have been updated and have failed to load");
+        Logger::error("Textures have been updated and have failed to load");
         return;
     }
     if (has_updated_shaders() && !load_program_and_shaders(transientStorage)) {
-        FP_ERROR("Shaders have been updated and have failed to load");
+        Logger::error("Shaders have been updated and have failed to load");
         return;
     }
 

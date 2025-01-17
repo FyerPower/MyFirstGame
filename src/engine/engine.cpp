@@ -59,7 +59,7 @@ void update_game(GameState* gameStateIn, RenderData* renderDataIn, Input* inputI
     if (update_game_ptr) {
         update_game_ptr(gameStateIn, renderDataIn, inputIn, deltaTime);
     } else {
-        FP_ASSERT(false, "update_game_ptr is null");
+        Logger::asssert(false, "update_game_ptr is null");
     }
 }
 
@@ -74,24 +74,24 @@ void reload_game_dll(BumpAllocator* transientStorage)
     if (currentTimestampGameDLL > lastEditTimestampGameDLL) {
         if (gameDLL) {
             bool freeResult = platform_free_dynamic_library(gameDLL);
-            FP_ASSERT(freeResult, "Failed to free (%s)", gameDLLPath);
+            Logger::asssert(freeResult, "Failed to free (%s)", gameDLLPath);
             gameDLL = nullptr;
-            FP_LOG("Freed (%s)", gameDLLPath);
+            Logger::log("Freed (%s)", gameDLLPath);
         }
 
         Sleep(10);
         while (!copy_file(gameDLLPath, gameDLLLoadedPath, transientStorage)) {
-            FP_LOG("Failed to copy DLL Files, Retrying...");
+            Logger::log("Failed to copy DLL Files, Retrying...");
         }
-        FP_LOG("Copied (%s) into (%s)", gameDLLPath, gameDLLLoadedPath);
+        Logger::log("Copied (%s) into (%s)", gameDLLPath, gameDLLLoadedPath);
 
         gameDLL = platform_load_dynamic_library(gameDLLLoadedPath);
-        FP_ASSERT(gameDLL, "Failed to load (%s)", gameDLLLoadedPath);
+        Logger::asssert(gameDLL, "Failed to load (%s)", gameDLLLoadedPath);
 
         update_game_ptr = (update_game_type*)platform_load_dynamic_function(gameDLL, "update_game");
-        FP_ASSERT(update_game_ptr, "Failed to load update_game function");
+        Logger::asssert(update_game_ptr, "Failed to load update_game function");
 
-        FP_LOG("Successfully loaded (%s)", gameDLLLoadedPath);
+        Logger::log("Successfully loaded (%s)", gameDLLLoadedPath);
         lastEditTimestampGameDLL = currentTimestampGameDLL;
     }
 }
@@ -109,7 +109,7 @@ int main()
     // Allocate the GameState into Memory
     void* gameState_ptr = bump_alloc(&persistentStorage, sizeof(GameState));
     if (!gameState_ptr) {
-        FP_ERROR("Failed to allow GameState");
+        Logger::error("Failed to allow GameState");
         return -1;
     }
     gameState = new (gameState_ptr) GameState();
@@ -117,7 +117,7 @@ int main()
     // Allocate the RenderData into Memory
     void* renderData_ptr = bump_alloc(&persistentStorage, sizeof(RenderData));
     if (!renderData_ptr) {
-        FP_ERROR("Failed to allow RenderData");
+        Logger::error("Failed to allow RenderData");
         return -1;
     }
     renderData = new (renderData_ptr) RenderData();
@@ -125,7 +125,7 @@ int main()
     // Allocate the Input into Memory
     input = (Input*)bump_alloc(&persistentStorage, sizeof(Input));
     if (!input) {
-        FP_ERROR("Failed to allow Input");
+        Logger::error("Failed to allow Input");
         return -1;
     }
 
@@ -134,17 +134,17 @@ int main()
     input->screenSize.y = WINDOW_SIZE_Y;
     std::string windowTitle = DEBUG_MODE == true ? (std::string(WINDOW_TITLE) + " (Debug Mode)") : WINDOW_TITLE;
     platform_create_window(input->screenSize.x, input->screenSize.y, windowTitle.c_str());
-    FP_LOG("Window Created");
+    Logger::log("Window Created");
 
     // Assign keys per platform
     platform_fill_keycode_lookup_table();
 
     // Initialize OpenGL
     gl_init(&transientStorage);
-    FP_LOG("Initialized OpenGL");
+    Logger::log("Initialized OpenGL");
 
     // Main Game Loop
-    FP_LOG("======= Game Loop Begin =======");
+    Logger::log("======= Game Loop Begin =======");
     while (isRunning) {
         // Get Delta Time
         float deltaTime = (float)get_delta_time();
@@ -167,9 +167,9 @@ int main()
         // Reset Storage (as its transient)
         transientStorage.used = 0;
     }
-    FP_LOG("======= Game Loop End =======");
+    Logger::log("======= Game Loop End =======");
 
     // Return 0 when game loop is done (exitting appliation)
-    FP_LOG("Shutdown complete");
+    Logger::log("Shutdown complete");
     return 0;
 }

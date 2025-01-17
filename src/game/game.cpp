@@ -80,7 +80,7 @@ Sprite* get_sprite(SpriteID spriteID)
 {
     Sprite* sprite = gameState->spriteArray[spriteID];
     if (!sprite) {
-        FP_ASSERT(false, "Sprite not found: %d", spriteID);
+        Logger::asssert(false, "Sprite not found: %d", spriteID);
     }
     return sprite;
 }
@@ -213,13 +213,13 @@ void handleInputActions(float deltaTime)
         Tile* tile = world->get_tile(worldPos);
     }
     if (just_pressed(MOUSE_SCROLL_DOWN)) {
-        FP_LOG("Key Pressed: MOUSE_SCROLL_DOWN");
+        Logger::log("Key Pressed: MOUSE_SCROLL_DOWN");
         if (is_control_pressed()) {
             renderData->gameCamera.zoomOut();
         }
     }
     if (just_pressed(MOUSE_SCROLL_UP)) {
-        FP_LOG("Key Pressed: MOUSE_SCROLL_UP");
+        Logger::log("Key Pressed: MOUSE_SCROLL_UP");
         if (is_control_pressed()) {
             renderData->gameCamera.zoomIn();
         }
@@ -228,7 +228,7 @@ void handleInputActions(float deltaTime)
 
 void loadWorld(const char* worldPath)
 {
-    FP_LOG("Loading Map..");
+    Logger::log("Loading Map..");
     World* world = gameState->world;
     tson::Tileson t;
     std::unique_ptr<tson::Map> map = t.parse(fs::path(worldPath));
@@ -250,9 +250,9 @@ void loadWorld(const char* worldPath)
                 }
             }
         }
-        FP_LOG("Map (%s) loaded successfully", worldPath);
+        Logger::log("Map (%s) loaded successfully", worldPath);
     } else {
-        FP_ASSERT(false, "Map (%s) loading failed", worldPath);
+        Logger::asssert(false, "Map (%s) loading failed", worldPath);
     }
 }
 
@@ -279,7 +279,7 @@ void initializeGame()
 
     // Mark Initialized
     gameState->initialized = true;
-    FP_LOG("Game Initialized");
+    Logger::log("Game Initialized");
 }
 
 void executeGameTick(float deltaTime)
@@ -309,7 +309,7 @@ void gameTickRunner(float deltaTime)
         gameState->internalTimer -= (float)UPDATE_DELAY;
         gameState->tickCounter++;
 
-        // FP_LOG("executeGameTick - %d", gameState->tickCounter);
+        // Logger::log("executeGameTick - %d", gameState->tickCounter);
         executeGameTick(deltaTime);
     }
 }

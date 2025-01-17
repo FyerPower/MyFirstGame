@@ -92,5 +92,5 @@ void draw_rect(IRect rect, const Color& color)
                                 .size = vec_2(rect.size),
                                 // Define the type of transform
                                 .transformType = TRANSFORM_TYPE_OUTLINE});
-    // FP_LOG("SIZE: %d %d", rect.size.x, rect.size.y);
+    // Logger::log("SIZE: %d %d", rect.size.x, rect.size.y);
 };

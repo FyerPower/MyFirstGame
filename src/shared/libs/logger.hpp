@@ -4,6 +4,10 @@
 // #tag Includes
 // ###############################################
 
+#include <format>
+#include <iostream>
+#include <string>
+
 #include <stdio.h>
 
 // ###############################################
@@ -45,14 +49,11 @@ const char* BrightWhite = "\x1b[97m";
 const char* Reset = "\x1b[0m";
 }; // namespace TextColor
 
-template <typename... Args> void FP_LOG(const char* msg, Args&&... args)
+namespace Logger {
+template <typename... Args> void log(const char* msg, Args&&... args)
 {
-    // std::string formatBuffer = std::format("LOG   | {} {} {}", TextColor::Green, msg, TextColor::Reset);
-    // std::string textBuffer = std::format(formatBuffer, args...);
-    // std::puts(textBuffer.c_str());
-
     char formatBuffer[8192] = {};
-    sprintf_s(formatBuffer, sizeof(formatBuffer), "LOG   | %s %s %s", TextColor::Green, msg, TextColor::Reset);
+    sprintf_s(formatBuffer, sizeof(formatBuffer), "LOG  | %s %s %s", TextColor::Green, msg, TextColor::Reset);
 
     char textBuffer[8192] = {};
     sprintf_s(textBuffer, sizeof(textBuffer), formatBuffer, args...);
@@ -60,7 +61,7 @@ template <typename... Args> void FP_LOG(const char* msg, Args&&... args)
     puts(textBuffer);
 }
 
-template <typename... Args> void FP_WARN(const char* msg, Args&&... args)
+template <typename... Args> void warn(const char* msg, Args&&... args)
 {
     char formatBuffer[8192] = {};
     sprintf_s(formatBuffer, sizeof(formatBuffer), "WARN  | %s %s %s", TextColor::Yellow, msg, TextColor::Reset);
@@ -71,7 +72,7 @@ template <typename... Args> void FP_WARN(const char* msg, Args&&... args)
     puts(textBuffer);
 }
 
-template <typename... Args> void FP_ERROR(const char* msg, Args&&... args)
+template <typename... Args> void error(const char* msg, Args&&... args)
 {
     char formatBuffer[8192] = {};
     sprintf_s(formatBuffer, sizeof(formatBuffer), "ERROR | %s %s %s", TextColor::Red, msg, TextColor::Reset);
@@ -82,7 +83,7 @@ template <typename... Args> void FP_ERROR(const char* msg, Args&&... args)
     puts(textBuffer);
 }
 
-template <typename... Args> void FP_ASSERT(bool x, const char* msg, Args&&... args)
+template <typename... Args> void asssert(bool x, const char* msg, Args&&... args)
 {
     if (!x) {
         char formatBuffer[8192] = {};
@@ -92,8 +93,8 @@ template <typename... Args> void FP_ASSERT(bool x, const char* msg, Args&&... ar
         sprintf_s(textBuffer, sizeof(textBuffer), formatBuffer, args...);
 
         puts(textBuffer);
-
         DEBUG_BREAK();
-        // __builtin_trap();
+        puts(textBuffer);
     }
 }
+} // namespace Logger

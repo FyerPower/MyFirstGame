@@ -131,7 +131,7 @@ std::array<Sprite*, SPRITE_COUNT> initializeSprites()
     spriteArray[SPRITE_PLAYER_RIGHT] = new Sprite({32, 80}, {32, 32}, {8, 16, 16, 16});
     spriteArray[SPRITE_PLAYER_BACK] = new Sprite({64, 80}, {32, 32}, {8, 16, 16, 16});
 
-    FP_LOG("Initialized Sprites");
+    Logger::log("Initialized Sprites");
 
     return spriteArray;
 }
