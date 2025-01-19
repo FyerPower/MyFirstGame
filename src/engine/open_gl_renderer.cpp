@@ -11,6 +11,7 @@
 
 #include "shared/libs/libs.hpp"
 #include "shared/models/input.hpp"
+#include "shared/models/render_data.hpp"
 #include "open_gl_wrapper.hpp"
 
 // To Load PNG Files
@@ -68,12 +69,17 @@ GLuint gl_create_shaders(GLenum shaderType, const char* shaderPath, BumpAllocato
         PLOG_ASSERT(false, std::string("Failed to load shader: (") + shaderPath + std::string(")"));
         return 0;
     }
-    char* transformHeader = read_file("src/shared/models/transform.hpp", &fileSize, transientStorage);
+    char* transformHeader = read_file("src/shared/models/Transform.hpp", &fileSize, transientStorage);
     if (!transformHeader) {
-        PLOG_ASSERT(false, "Failed to load shader header");
+        PLOG_ASSERT(false, "Failed to load Transform.hpp into Shader");
         return 0;
     }
-    const char* shaderSources[] = {"#version 430 core \r\n", transformHeader, shader};
+    char* materialHeader = read_file("src/shared/models/Material.hpp", &fileSize, transientStorage);
+    if (!materialHeader) {
+        PLOG_ASSERT(false, "Failed to load Material.hpp into Shader");
+        return 0;
+    }
+    const char* shaderSources[] = {"#version 430 core \r\n", transformHeader, materialHeader, shader};
     glShaderSource(shaderId, ArraySize(shaderSources), shaderSources, 0);
     glCompileShader(shaderId);
 
@@ -229,10 +235,10 @@ bool gl_init(BumpAllocator* transientStorage)
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
     // // Create Materials Storage Buffer - Generate 1 buffer, configure it, and store it in glContext.materialSBOID, then unbind it
-    // glGenBuffers(1, &glContext.materialSBOID);
-    // glBindBuffer(GL_SHADER_STORAGE_BUFFER, glContext.materialSBOID);
-    // glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(Material) * renderData->materials.maxElements, renderData->materials.elements, GL_DYNAMIC_DRAW);
-    // glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+    glGenBuffers(1, &glContext.materialSBOID);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, glContext.materialSBOID);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(Material) * renderData->materials.maxElements, renderData->materials.elements, GL_DYNAMIC_DRAW);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
     // Create the Uniforms - Screen Size and Orthographic Projection
     glContext.screenSizeID = glGetUniformLocation(glContext.programID, "screenSize");
@@ -262,9 +268,12 @@ void gl_render(BumpAllocator* transientStorage)
         PLOG_ERROR << "Textures have been updated and have failed to load";
         return;
     }
-    if (has_updated_shaders() && !load_program_and_shaders(transientStorage)) {
-        PLOG_ERROR << "Shaders have been updated and have failed to load";
-        return;
+    if (has_updated_shaders()) {
+        Sleep(10);
+        if (!load_program_and_shaders(transientStorage)) {
+            PLOG_ERROR << "Shaders have been updated and have failed to load";
+            return;
+        }
     }
 
     // Clear the Screen by setting the color to black
@@ -280,12 +289,12 @@ void gl_render(BumpAllocator* transientStorage)
     Vec2 screenSize = {(float)input->screenSize.x, (float)input->screenSize.y};
     glUniform2fv(glContext.screenSizeID, 1, &screenSize.x);
 
-    // // Copy Materials to the GPU
-    // {
-    //     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, glContext.materialSBOID);
-    //     glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(Material) * renderData->materials.count, renderData->materials.elements);
-    //     renderData->materials.clear();
-    // }
+    // Copy Materials to the GPU
+    {
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, glContext.materialSBOID);
+        glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(Material) * renderData->materials.count, renderData->materials.elements);
+        renderData->materials.clear();
+    }
 
     // Game Tiles / Objects
     {
@@ -294,9 +303,8 @@ void gl_render(BumpAllocator* transientStorage)
         glUniformMatrix4fv(glContext.orthoProjectionID, 1, GL_FALSE, &orthoProjection.ax);
 
         // Copy transforms to the GPU
-        GLsizeiptr buffer_size = sizeof(Transform) * renderData->transforms.count;
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, glContext.transformSBOID);
-        glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, buffer_size, renderData->transforms.elements);
+        glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(Transform) * renderData->transforms.count, renderData->transforms.elements);
 
         // Draw the quads (2x triangles) totally 6 indices per quad, render all transforms (instances)
         glDrawArraysInstanced(GL_TRIANGLES, 0, 6, renderData->transforms.count);

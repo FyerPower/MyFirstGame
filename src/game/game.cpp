@@ -332,7 +332,7 @@ void drawWorld()
             if (DEBUG_MODE_SHOW_HITBOXES) {
                 std::optional<IRect> hitbox = tile->getHitbox();
                 if (hitbox.has_value()) {
-                    draw_rect(hitbox.value(), Colors::Green);
+                    draw_fill(hitbox.value(), Colors::Red);
                 }
             }
         }
@@ -369,7 +369,7 @@ void drawPlayer()
     if (DEBUG_MODE_SHOW_HITBOXES) {
         std::optional<IRect> hitbox = gameState->player->getHitbox();
         if (hitbox.has_value()) {
-            draw_rect(hitbox.value(), Colors::Green);
+            draw_fill(hitbox.value(), Colors::Red);
         }
     }
 }

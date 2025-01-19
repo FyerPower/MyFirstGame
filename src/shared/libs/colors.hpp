@@ -3,15 +3,15 @@
 #include <cstdint>
 
 struct Color {
-    uint8_t r;
-    uint8_t g;
-    uint8_t b;
-    uint8_t a;
+    float r;
+    float g;
+    float b;
+    float a;
 
-    Color() : r(0), g(0), b(0), a(255)
+    Color() : r(0.0), g(0.0), b(0.0), a(1.0)
     {}
 
-    Color(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255) : r(red), g(green), b(blue), a(alpha)
+    Color(float red, float green, float blue, float alpha = 255) : r(red), g(green), b(blue), a(alpha)
     {}
 
     bool operator==(const Color& other) const
@@ -22,15 +22,15 @@ struct Color {
 
 // Predefined colors
 namespace Colors {
-const Color Red(255, 0, 0);
-const Color Green(0, 255, 0);
-const Color Blue(0, 0, 255);
-const Color White(255, 255, 255);
-const Color Black(0, 0, 0);
-const Color Yellow(255, 255, 0);
-const Color Cyan(0, 255, 255);
-const Color Magenta(255, 0, 255);
-const Color Transparent(0, 0, 0, 0);
+const Color Red(1.0, 0.0, 0.0);
+const Color Green(0.0, 1.0, 0.0);
+const Color Blue(0.0, 0.0, 1.0);
+const Color White(1.0, 1.0, 1.0);
+const Color Black(0.0, 0.0, 0.0);
+const Color Yellow(1.0, 1.0, 0.0);
+const Color Cyan(0.0, 1.0, 1.0);
+const Color Magenta(1.0, 0.0, 1.0);
+const Color Transparent(0.0, 0.0, 0.0, 0.0);
 } // namespace Colors
 
 /*

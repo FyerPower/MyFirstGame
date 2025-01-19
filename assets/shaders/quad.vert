@@ -27,6 +27,7 @@ layout(binding = 0, std430) readonly buffer TransformSBO
 layout(location = 0) out vec2 textureCoordsOut;
 layout(location = 1) out flat int transformTypeOut;
 layout(location = 2) out flat vec2 transformSizeOut;
+layout(location = 3) out flat int materialIndexOut;
 
 // ###########################################################################################################
 // Uniforms
@@ -125,6 +126,7 @@ void main()
     Transform transform = transforms[gl_InstanceID];
     transformTypeOut = transform.transformType;
     transformSizeOut = transform.size;
+    materialIndexOut = transform.materialIndex;
 
     // Calculate the final position of the vertex based on the orthographic projection.
     calculate_gl_position(transform);
@@ -135,6 +137,10 @@ void main()
     }
     // If the transform is a texture... generate the texture coordinates.
     else if (bool(transform.transformType & TRANSFORM_TYPE_OUTLINE)) {
+        generate_outline_coordinates(transform);
+    }
+    // If the transform is a texture... generate the texture coordinates.
+    else if (bool(transform.transformType & TRANSFORM_TYPE_FILL)) {
         generate_outline_coordinates(transform);
     }
 }

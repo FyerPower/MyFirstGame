@@ -2,7 +2,8 @@
 
 #include "../libs/array.hpp"
 #include "../camera.hpp"
-#include "transform.hpp"
+#include "Transform.hpp"
+#include "Material.hpp"
 
 // #############################################################################
 // #tag Structs
@@ -16,7 +17,7 @@ class RenderData
     Camera uiCamera;
 
     Array<Transform, 1000> transforms; // Transformation Store
-    // Array<Material, 1000> materials;   // Transformation Store
+    Array<Material, 1000> materials;   // Transformation Store
 };
 
 // #############################################################################

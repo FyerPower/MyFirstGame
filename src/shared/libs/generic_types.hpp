@@ -101,6 +101,11 @@ struct Vec4 {
     {
         return values[idx];
     }
+
+    bool operator==(Vec4 other)
+    {
+        return x == other.x && y == other.y && z == other.z && w == other.w;
+    }
 };
 
 struct Mat4 {

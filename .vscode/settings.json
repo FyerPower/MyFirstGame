@@ -2,10 +2,8 @@
     "editor.formatOnSave": true,
     "triggerTaskOnSave.tasks": {
         "CMake: Build": [
-            "assets/**/*",
             "src/**/*",
-            "src/*",
-            "build.sh"
+            "src/*"
         ],
     },
     "files.associations": {
