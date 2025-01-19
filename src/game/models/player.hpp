@@ -1,6 +1,5 @@
 #pragma once
 
-#include "config.hpp"
 #include "shared/libs/libs.hpp"
 
 class Player

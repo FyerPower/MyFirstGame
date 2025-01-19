@@ -288,12 +288,7 @@ void gl_render(BumpAllocator* transientStorage)
     // Game Tiles / Objects
     {
         // Game Camera - Orthographic Projection
-        OrthographicCamera2D camera = renderData->gameCamera;
-        Vec2 zoomedDimensions = camera.getZoomedDimensions();
-        Mat4 orthoProjection = Geometry::orthographic_projection(camera.position.x - zoomedDimensions.x / 2.0f,  // left
-                                                                 camera.position.x + zoomedDimensions.x / 2.0f,  // right
-                                                                 camera.position.y - zoomedDimensions.y / 2.0f,  // top
-                                                                 camera.position.y + zoomedDimensions.y / 2.0f); // bottom
+        Mat4 orthoProjection = renderData->gameCamera.getOrthographicProjection(input->screenSize, true);
         glUniformMatrix4fv(glContext.orthoProjectionID, 1, GL_FALSE, &orthoProjection.ax);
 
         // Copy transforms to the GPU

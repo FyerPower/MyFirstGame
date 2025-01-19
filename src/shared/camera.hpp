@@ -1,9 +1,10 @@
 #pragma once
 
-#include "libs/generic_types.hpp"
-#include "libs/geometry.hpp"
+#include "shared/libs/constants.hpp"
+#include "shared/libs/generic_types.hpp"
+#include "shared/libs/geometry.hpp"
 
-class OrthographicCamera2D
+class Camera
 {
   public:
     float zoom = 1.0f;
@@ -15,13 +16,32 @@ class OrthographicCamera2D
         return dimensions / zoom;
     }
 
-    Mat4 getOrthographicProjection()
+    Mat4 getOrthographicProjection(IVec2 screenSize, bool clampToWorld = true)
     {
         Vec2 zoomedDimensions = getZoomedDimensions();
-        return Geometry::orthographic_projection(position.x - zoomedDimensions.x / 2,  // left
-                                                 position.x + zoomedDimensions.x / 2,  // right
-                                                 position.y + zoomedDimensions.y / 2,  // top
-                                                 position.y - zoomedDimensions.y / 2); // bottom
+        float left = position.x - zoomedDimensions.x / 2;
+        float right = position.x + zoomedDimensions.x / 2;
+        float top = position.y + zoomedDimensions.y / 2;
+        float bottom = position.y - zoomedDimensions.y / 2;
+
+        if (clampToWorld) {
+            // if (left < 0) {
+            //     left = 0;
+            //     right = right + screenSize.x;
+            // } else if (right > WORLD_WIDTH) {
+            //     right = WORLD_WIDTH;
+            //     left = left - screenSize.x;
+            // }
+            // if (top < 0) {
+            //     top = 0.0;
+            //     bottom = (float)screenSize.y;
+            // } else if (bottom > WORLD_HEIGHT) {
+            //     bottom = (float)WORLD_HEIGHT;
+            //     top = bottom - screenSize.y;
+            // }
+        }
+
+        return Geometry::orthographic_projection(left, right, bottom, top);
     }
 
     void zoomIn()

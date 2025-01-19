@@ -9,7 +9,6 @@
 #include "shared/models/input.hpp"
 #include "game/render_interface.hpp"
 
-#include "game/models/config.hpp"
 #include "game/models/player.hpp"
 #include "game/models/world.hpp"
 #include "game/models/sprite.hpp"
