@@ -8,7 +8,11 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Include directories
-include_directories(src third_party third_party/opengl)
+include_directories(src)
+include_directories(third_party/opengl)
+include_directories(third_party/stb_image)
+include_directories(third_party/tileson)
+include_directories(third_party/plog)
 
 # Compiler warnings
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")

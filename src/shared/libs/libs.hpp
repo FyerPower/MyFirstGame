@@ -12,8 +12,6 @@
 
 #include "colors.hpp"
 
-#include "logger.hpp"
-
 #include "bump_allocator.hpp"
 
 #include "file_io.hpp"

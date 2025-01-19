@@ -2,6 +2,11 @@
 // #tag Includes
 // ###############################################
 
+#include <plog/Log.h>
+#include <plog/Init.h>
+#include <plog/Appenders/ColorConsoleAppender.h>
+#include <plog/Formatters/TxtFormatter.h>
+
 #include "shared/libs/libs.hpp"
 #include "shared/models/input.hpp"
 #include "game/game.hpp"
@@ -59,7 +64,7 @@ void update_game(GameState* gameStateIn, RenderData* renderDataIn, Input* inputI
     if (update_game_ptr) {
         update_game_ptr(gameStateIn, renderDataIn, inputIn, deltaTime);
     } else {
-        Logger::asssert(false, "update_game_ptr is null");
+        PLOG_ASSERT(false, "update_game_ptr is null");
     }
 }
 
@@ -74,24 +79,24 @@ void reload_game_dll(BumpAllocator* transientStorage)
     if (currentTimestampGameDLL > lastEditTimestampGameDLL) {
         if (gameDLL) {
             bool freeResult = platform_free_dynamic_library(gameDLL);
-            Logger::asssert(freeResult, "Failed to free (%s)", gameDLLPath);
+            PLOG_ASSERT(freeResult, std::string("Failed to free") + gameDLLPath);
             gameDLL = nullptr;
-            Logger::log("Freed (%s)", gameDLLPath);
+            PLOG_INFO << "Freed (" << gameDLLPath << ")";
         }
 
         Sleep(10);
         while (!copy_file(gameDLLPath, gameDLLLoadedPath, transientStorage)) {
-            Logger::log("Failed to copy DLL Files, Retrying...");
+            PLOG_INFO << "Failed to copy DLL Files, Retrying...";
         }
-        Logger::log("Copied (%s) into (%s)", gameDLLPath, gameDLLLoadedPath);
+        PLOG_INFO << "Copied (" << gameDLLPath << ") into (" << gameDLLLoadedPath << ")";
 
         gameDLL = platform_load_dynamic_library(gameDLLLoadedPath);
-        Logger::asssert(gameDLL, "Failed to load (%s)", gameDLLLoadedPath);
+        PLOG_ASSERT(gameDLL, std::string("Failed to load (") + gameDLLLoadedPath + std::string(")"));
 
         update_game_ptr = (update_game_type*)platform_load_dynamic_function(gameDLL, "update_game");
-        Logger::asssert(update_game_ptr, "Failed to load update_game function");
+        PLOG_ASSERT(update_game_ptr, "Failed to load update_game function");
 
-        Logger::log("Successfully loaded (%s)", gameDLLLoadedPath);
+        PLOG_INFO << "Successfully loaded (" << gameDLLLoadedPath << ")";
         lastEditTimestampGameDLL = currentTimestampGameDLL;
     }
 }
@@ -102,6 +107,9 @@ void reload_game_dll(BumpAllocator* transientStorage)
 
 int main()
 {
+    static plog::ColorConsoleAppender<plog::TxtFormatter> consoleAppender;
+    plog::init(plog::verbose, &consoleAppender);
+
     // Create 50MB of memory that is transient (resets each game loop) and persistent.
     BumpAllocator transientStorage = make_bump_allocator(MB(50));
     BumpAllocator persistentStorage = make_bump_allocator(MB(50));
@@ -109,7 +117,7 @@ int main()
     // Allocate the GameState into Memory
     void* gameState_ptr = bump_alloc(&persistentStorage, sizeof(GameState));
     if (!gameState_ptr) {
-        Logger::error("Failed to allow GameState");
+        PLOG_ERROR << "Failed to allow GameState";
         return -1;
     }
     gameState = new (gameState_ptr) GameState();
@@ -117,7 +125,7 @@ int main()
     // Allocate the RenderData into Memory
     void* renderData_ptr = bump_alloc(&persistentStorage, sizeof(RenderData));
     if (!renderData_ptr) {
-        Logger::error("Failed to allow RenderData");
+        PLOG_ERROR << "Failed to allow RenderData";
         return -1;
     }
     renderData = new (renderData_ptr) RenderData();
@@ -125,7 +133,7 @@ int main()
     // Allocate the Input into Memory
     input = (Input*)bump_alloc(&persistentStorage, sizeof(Input));
     if (!input) {
-        Logger::error("Failed to allow Input");
+        PLOG_ERROR << "Failed to allow Input";
         return -1;
     }
 
@@ -134,17 +142,17 @@ int main()
     input->screenSize.y = WINDOW_SIZE_Y;
     std::string windowTitle = DEBUG_MODE == true ? (std::string(WINDOW_TITLE) + " (Debug Mode)") : WINDOW_TITLE;
     platform_create_window(input->screenSize.x, input->screenSize.y, windowTitle.c_str());
-    Logger::log("Window Created");
+    PLOG_INFO << "Window Created";
 
     // Assign keys per platform
     platform_fill_keycode_lookup_table();
 
     // Initialize OpenGL
     gl_init(&transientStorage);
-    Logger::log("Initialized OpenGL");
+    PLOG_INFO << "Initialized OpenGL";
 
     // Main Game Loop
-    Logger::log("======= Game Loop Begin =======");
+    PLOG_INFO << "======= Game Loop Begin =======";
     while (isRunning) {
         // Get Delta Time
         float deltaTime = (float)get_delta_time();
@@ -167,9 +175,9 @@ int main()
         // Reset Storage (as its transient)
         transientStorage.used = 0;
     }
-    Logger::log("======= Game Loop End =======");
+    PLOG_INFO << "======= Game Loop End =======";
 
     // Return 0 when game loop is done (exitting appliation)
-    Logger::log("Shutdown complete");
+    PLOG_INFO << "Shutdown complete";
     return 0;
 }

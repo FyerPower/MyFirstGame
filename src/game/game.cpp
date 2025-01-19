@@ -4,6 +4,7 @@
 
 #include "tileson.hpp"
 
+#include "shared/plog.hpp"
 #include "shared/libs/libs.hpp"
 #include "game/game.hpp"
 #include "game/render_interface.hpp"
@@ -80,7 +81,7 @@ Sprite* get_sprite(SpriteID spriteID)
 {
     Sprite* sprite = gameState->spriteArray[spriteID];
     if (!sprite) {
-        Logger::asssert(false, "Sprite not found: %d", spriteID);
+        PLOG_ASSERT(false, std::string("Sprite not found: ") + std::to_string(spriteID));
     }
     return sprite;
 }
@@ -213,13 +214,13 @@ void handleInputActions(float deltaTime)
         Tile* tile = world->get_tile(worldPos);
     }
     if (just_pressed(MOUSE_SCROLL_DOWN)) {
-        Logger::log("Key Pressed: MOUSE_SCROLL_DOWN");
+        PLOG_INFO << "Key Pressed: MOUSE_SCROLL_DOWN";
         if (is_control_pressed()) {
             renderData->gameCamera.zoomOut();
         }
     }
     if (just_pressed(MOUSE_SCROLL_UP)) {
-        Logger::log("Key Pressed: MOUSE_SCROLL_UP");
+        PLOG_INFO << "Key Pressed: MOUSE_SCROLL_UP";
         if (is_control_pressed()) {
             renderData->gameCamera.zoomIn();
         }
@@ -228,7 +229,7 @@ void handleInputActions(float deltaTime)
 
 void loadWorld(const char* worldPath)
 {
-    Logger::log("Loading Map..");
+    PLOG_INFO << "Loading Map: " << worldPath;
     World* world = gameState->world;
     tson::Tileson t;
     std::unique_ptr<tson::Map> map = t.parse(fs::path(worldPath));
@@ -250,9 +251,9 @@ void loadWorld(const char* worldPath)
                 }
             }
         }
-        Logger::log("Map (%s) loaded successfully", worldPath);
+        PLOG_INFO << "Map (" << worldPath << ") loaded successfully";
     } else {
-        Logger::asssert(false, "Map (%s) loading failed", worldPath);
+        PLOG_ASSERT(false, std::string("Failed to load Map: ") + worldPath);
     }
 }
 
@@ -279,7 +280,7 @@ void initializeGame()
 
     // Mark Initialized
     gameState->initialized = true;
-    Logger::log("Game Initialized");
+    PLOG_INFO << "Game Initialized";
 }
 
 void executeGameTick(float deltaTime)
@@ -309,7 +310,7 @@ void gameTickRunner(float deltaTime)
         gameState->internalTimer -= (float)UPDATE_DELAY;
         gameState->tickCounter++;
 
-        // Logger::log("executeGameTick - %d", gameState->tickCounter);
+        // PLOG_INFO << "Game Tick: " << gameState->tickCounter;
         executeGameTick(deltaTime);
     }
 }

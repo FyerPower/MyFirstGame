@@ -1,7 +1,5 @@
 #pragma once
 
-#include "../libs/logger.hpp"
-
 bool platform_create_window(int width, int height, char* title)
 {
     // TODO: Implement Linux Platform Function

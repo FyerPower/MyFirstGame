@@ -4,8 +4,8 @@
 // #tag Includes
 // ###############################################
 
+#include "shared/plog.hpp"
 #include "bump_allocator.hpp"
-#include "logger.hpp"
 
 // This is to get the edit timestampt of files
 #include <sys/stat.h>
@@ -35,7 +35,7 @@ long get_file_size(const char* filePath)
 
 bool file_exists(const char* filePath)
 {
-    Logger::asssert(filePath, "No filePath supplied!");
+    PLOG_ASSERT(filePath, "No filePath supplied!");
 
     // Attempt to open the file (read binary)
     FILE* file;
@@ -52,9 +52,9 @@ bool file_exists(const char* filePath)
 char* read_file(const char* filePath, int* fileSize, char* buffer)
 {
     // Ensure variables are sent
-    Logger::asssert(filePath, "No filePath specified.");
-    Logger::asssert(fileSize, "No fileSize specified.");
-    Logger::asssert(buffer, "No buffer specified.");
+    PLOG_ASSERT(filePath, "No filePath specified.");
+    PLOG_ASSERT(fileSize, "No fileSize specified.");
+    PLOG_ASSERT(buffer, "No buffer specified.");
 
     // Set the fileSize to zero (calculated later)
     *fileSize = 0;
@@ -99,15 +99,15 @@ char* read_file(const char* filePath, int* fileSize, BumpAllocator* bumpAllocato
 void write_file(const char* filePath, char* buffer, int fileSize)
 {
     // Ensure variables are sent
-    Logger::asssert(filePath, "No filePath specified.");
-    Logger::asssert(buffer, "No buffer specified.");
-    Logger::asssert(fileSize, "No fileSize specified.");
+    PLOG_ASSERT(filePath, "No filePath specified.");
+    PLOG_ASSERT(buffer, "No buffer specified.");
+    PLOG_ASSERT(fileSize, "No fileSize specified.");
 
     // Attempt to open the file (write binary)
     FILE* file;
     if (fopen_s(&file, filePath, "wb") != 0) {
         // If no file was found, log an error and return
-        Logger::error("Failed opening file: %s", filePath);
+        PLOG_ERROR << "Failed opening file: " << filePath;
         return;
     }
 
@@ -121,9 +121,9 @@ void write_file(const char* filePath, char* buffer, int fileSize)
 bool copy_file(const char* filePath, const char* outputPath, char* buffer)
 {
     // Ensure variables are sent
-    Logger::asssert(filePath, "No filePath specified.");
-    Logger::asssert(outputPath, "No outputPath specified.");
-    Logger::asssert(buffer, "No buffer specified.");
+    PLOG_ASSERT(filePath, "No filePath specified.");
+    PLOG_ASSERT(outputPath, "No outputPath specified.");
+    PLOG_ASSERT(buffer, "No buffer specified.");
 
     // initialize fileSize to 0 and then read the file getting its content and size.
     int fileSize = 0;
@@ -132,14 +132,14 @@ bool copy_file(const char* filePath, const char* outputPath, char* buffer)
     // open the destination file (creates if it doesn't exist)
     FILE* outputFile;
     if (fopen_s(&outputFile, outputPath, "wb") != 0) {
-        Logger::error("Failed opening File: %s", outputPath);
+        PLOG_ERROR << "Failed opening File: " << outputPath;
         return false;
     }
 
     // write the contents of the original file into the outputFile
     auto result = fwrite(data, sizeof(char), fileSize, outputFile);
     if (!result) {
-        Logger::error("Failed writing File: %s", outputPath);
+        PLOG_ERROR << "Failed writing File: " << outputPath;
         fclose(outputFile);
         return false;
     }

@@ -4,6 +4,8 @@
 // #tag Includes
 // ###############################################
 
+#include "shared/plog.hpp"
+
 #define GL_GLEXT_PROTOTYPES
 #include "glcorearb.h"
 
@@ -51,9 +53,9 @@ static GLContext glContext;
 static void APIENTRY gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* user)
 {
     if (severity == GL_DEBUG_SEVERITY_LOW || severity == GL_DEBUG_SEVERITY_MEDIUM || severity == GL_DEBUG_SEVERITY_HIGH) {
-        Logger::asssert(false, "OpenGL Error: %s", message);
+        PLOG_ASSERT(false, std::string("OpenGL Error: ") + message);
     } else {
-        Logger::log((char*)message);
+        PLOG_INFO << (char*)message;
     }
 }
 
@@ -63,12 +65,12 @@ GLuint gl_create_shaders(GLenum shaderType, const char* shaderPath, BumpAllocato
     GLuint shaderId = glCreateShader(shaderType);
     char* shader = read_file(shaderPath, &fileSize, transientStorage);
     if (!shader) {
-        Logger::asssert(false, "Failed to load shader: %s", shaderPath);
+        PLOG_ASSERT(false, std::string("Failed to load shader: (") + shaderPath + std::string(")"));
         return 0;
     }
     char* transformHeader = read_file("src/shared/models/transform.hpp", &fileSize, transientStorage);
     if (!transformHeader) {
-        Logger::asssert(false, "Failed to load shader header");
+        PLOG_ASSERT(false, "Failed to load shader header");
         return 0;
     }
     const char* shaderSources[] = {"#version 430 core \r\n", transformHeader, shader};
@@ -82,7 +84,7 @@ GLuint gl_create_shaders(GLenum shaderType, const char* shaderPath, BumpAllocato
         glGetShaderiv(shaderId, GL_COMPILE_STATUS, &success);
         if (!success) {
             glGetShaderInfoLog(shaderId, 2048, 0, shaderLog);
-            Logger::asssert(false, "Failed to Compile Shaders (%s) - %s", shaderPath, shaderLog);
+            PLOG_ASSERT(false, std::string("Failed to Compile Shaders (") + shaderPath + std::string(") - ") + shaderLog);
             return 0;
         }
     }
@@ -99,14 +101,14 @@ bool has_updated_shaders()
 
 bool load_program_and_shaders(BumpAllocator* transientStorage)
 {
-    Logger::log("Loading Shaders");
+    PLOG_INFO << "Loading Shaders";
 
     // create our shaders
     GLuint vertShaderID = gl_create_shaders(GL_VERTEX_SHADER, "assets/shaders/quad.vert", transientStorage);
     GLuint fragShaderID = gl_create_shaders(GL_FRAGMENT_SHADER, "assets/shaders/quad.frag", transientStorage);
 
     if (!vertShaderID || !fragShaderID) {
-        Logger::asssert(false, "Failed to create shaders");
+        PLOG_ASSERT(false, "Failed to create shaders");
         return false;
     }
 
@@ -132,7 +134,7 @@ bool load_program_and_shaders(BumpAllocator* transientStorage)
     glGetProgramiv(programID, GL_LINK_STATUS, &programSuccess);
     if (!programSuccess) {
         glGetProgramInfoLog(programID, 512, 0, programInfoLog);
-        Logger::asssert(false, "Failed to link program: %s", programInfoLog);
+        PLOG_ASSERT(false, std::string("Failed to link program: ") + programInfoLog);
         return false;
     }
 
@@ -153,13 +155,13 @@ bool has_updated_textures()
 
 bool load_textures()
 {
-    Logger::log("Loading Textures");
+    PLOG_INFO << "Loading Textures";
 
     int width, height, channels;
     unsigned char* data = stbi_load(TEXTURE_PATH, &width, &height, &channels, STBI_rgb_alpha);
 
     if (!data) {
-        Logger::asssert(false, "Failed to Load Image");
+        PLOG_ASSERT(false, "Failed to Load Image");
         return false;
     }
 
@@ -173,7 +175,7 @@ bool load_textures()
     // Update our timestamp
     glContext.textureTimestamp = get_timestamp(TEXTURE_PATH);
 
-    Logger::log("Successfully Loaded Textures(%s) Width(%d) Height(%d) Channels(%d)", TEXTURE_PATH, width, height, channels);
+    PLOG_INFO << "Successfully Loaded Textures(" << TEXTURE_PATH << ") Width(" << width << ") Height(" << height << ") Channels(" << channels << ")";
     return true;
 }
 
@@ -257,11 +259,11 @@ void gl_render(BumpAllocator* transientStorage)
 {
     // Hot Reloading - Textures
     if (has_updated_textures() && !load_textures()) {
-        Logger::error("Textures have been updated and have failed to load");
+        PLOG_ERROR << "Textures have been updated and have failed to load";
         return;
     }
     if (has_updated_shaders() && !load_program_and_shaders(transientStorage)) {
-        Logger::error("Shaders have been updated and have failed to load");
+        PLOG_ERROR << "Shaders have been updated and have failed to load";
         return;
     }
 

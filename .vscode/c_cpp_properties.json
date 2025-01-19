@@ -4,7 +4,10 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/third_party/**/*"
+                "${workspaceFolder}/third_party/opengl/**",
+                "${workspaceFolder}/third_party/stb_image/**",
+                "${workspaceFolder}/third_party/tileson/**",
+                "${workspaceFolder}/third_party/plog/**"
             ],
             "defines": [
                 "_DEBUG",

@@ -67,6 +67,14 @@ static GameState* gameState;
 // #tag Functions (Exposed)
 // ###############################################
 
+#ifdef _WIN32
+#define EXPORT_FN __declspec(dllexport)
+#elif __linux__
+#define EXPORT_FN
+#elif __APPLE__
+#define EXPORT_FN
+#endif
+
 // TODO: Why is this "C" and not "C++"?
 extern "C" {
 EXPORT_FN void update_game(GameState* gameStateIn, RenderData* renderDataIn, Input* inputIn, float deltaTime);

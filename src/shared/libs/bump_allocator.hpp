@@ -4,7 +4,7 @@
 // #tag Includes
 // ###############################################
 
-#include "logger.hpp"
+#include "shared/plog.hpp"
 #include "generic_types.hpp"
 
 // This is to get malloc
@@ -42,7 +42,7 @@ BumpAllocator make_bump_allocator(size_t size)
     }
     // If our memory was not properly allocated, lets error out
     else {
-        Logger::asssert(false, "Failed to allocate memory.");
+        PLOG_ASSERT(false, "Failed to allocate memory.");
     }
 
     return ba;
@@ -60,7 +60,7 @@ char* bump_alloc(BumpAllocator* bumpAllocator, size_t size)
         result = bumpAllocator->memory + bumpAllocator->used;
         bumpAllocator->used += allignedSize;
     } else {
-        Logger::asssert(false, "BumpAllocator is Full");
+        PLOG_ASSERT(false, "BumpAllocator is Full");
     }
 
     return result;
