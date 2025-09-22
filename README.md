@@ -1,5 +1,7 @@
 # MyFirstGame
 
+A venture into C++ Game Development.   This is far from done or polished, but offered good insights into GPU Shader Development, C++, Game Loop, and many other aspects of Game Development.
+
 ### Folder Structure
 
 ```
